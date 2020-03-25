@@ -9,11 +9,11 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 
-find_package(Boost REQUIRED)
 find_package(fmt REQUIRED)
 find_package(slsDetectorPackage REQUIRED)
 
-add_executable(urecv main.cpp UdpSocket.cpp Streamer.cpp utils.cpp)
+
+add_executable(urecv src/main.cpp src/UdpSocket.cpp src/Streamer.cpp src/utils.cpp)
 target_compile_options(urecv PRIVATE 
                             -Wall
                             -Wextra
@@ -30,5 +30,4 @@ target_compile_options(urecv PRIVATE
 )
 
 target_link_libraries(urecv fmt pthread slsSupportLib)
-target_include_directories(urecv PRIVATE ${Boost_INCLUDE_DIRS} )
 
