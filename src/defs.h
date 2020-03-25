@@ -1,9 +1,27 @@
 #pragma once
-#include "sls_detector_defs.h"
-using PacketHeader = slsDetectorDefs::sls_detector_header;
-constexpr size_t nrow = 512;
-constexpr size_t ncol = 1024;
-constexpr size_t packetsPerFrame = 128;
-constexpr int payload_size = 8192;
-constexpr ssize_t packet_size = sizeof(PacketHeader) + payload_size;
-constexpr size_t frame_size = nrow*ncol*sizeof(uint16_t);
+#include <cstdint>
+#include <cstddef>
+// copy of slsDetectorDefs::sls_detector_header; be careful with versions!
+struct PacketHeader {
+    uint64_t frameNumber;
+    uint32_t expLength; /* Eiger: numsubframes, exptime x 100ns others) */
+    uint32_t packetNumber;
+    uint64_t bunchId;
+    uint64_t timestamp;
+    uint16_t modId;
+    uint16_t row;
+    uint16_t column;
+    uint16_t reserved;
+    uint32_t debug;
+    uint16_t roundRNumber;
+    uint8_t detType;
+    uint8_t version;
+};
+constexpr size_t QUEUE_SIZE = 100;
+constexpr size_t NROW = 512;
+constexpr size_t NCOL = 1024;
+constexpr size_t PACKETS_PER_FRAME = 128;
+constexpr int PAYLOAD_SIZE = 8192;
+constexpr int PACKET_SIZE = sizeof(PacketHeader) + PAYLOAD_SIZE;
+constexpr size_t FRAME_SIZE = NROW * NCOL * sizeof(uint16_t);
+
