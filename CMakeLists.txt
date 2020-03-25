@@ -13,7 +13,7 @@ find_package(Boost REQUIRED)
 find_package(fmt REQUIRED)
 find_package(slsDetectorPackage REQUIRED)
 
-add_executable(urecv main.cpp UdpSocket.cpp)
+add_executable(urecv main.cpp UdpSocket.cpp Streamer.cpp utils.cpp)
 target_compile_options(urecv PRIVATE 
                             -Wall
                             -Wextra
