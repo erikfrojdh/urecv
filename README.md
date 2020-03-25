@@ -39,6 +39,7 @@ Usage
     ./urecv 192.168.1.29:50001 
 
     #optional zmq endpoint
+    ./urecv 192.168.1.29:50001 tcp://*:4545
     ./urecv 192.168.1.29:50001 ipc:///tmp/987
 
 ```
