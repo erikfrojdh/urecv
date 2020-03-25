@@ -4,8 +4,8 @@
 #include <fmt/format.h>
 
 Receiver::Receiver(size_t frame_queue_size)
-    : frame_queue_size_(frame_queue_size), freeQueue_(frame_queue_size_),
-      dataQueue_(frame_queue_size_),
+    : frame_queue_size_(frame_queue_size), free_queue_(frame_queue_size_),
+      data_queue_(frame_queue_size_),
       data_(new std::byte[FRAME_SIZE * frame_queue_size_]) {
     fillFreeQueue();
 }
@@ -19,7 +19,7 @@ void Receiver::fillFreeQueue() {
     std::fill_n(data_, FRAME_SIZE * frame_queue_size_, std::byte(0));
     for (size_t i = 0; i < frame_queue_size_; ++i) {
         img.data = data_ + i * FRAME_SIZE;
-        freeQueue_.push(img);
+        free_queue_.push(img);
     }
 }
 
@@ -37,7 +37,7 @@ void Receiver::ReceivePackets(const std::string &node, const std::string &port) 
     uint64_t currentFrameNumber = header.frameNumber;
     int numPacketsReceived = 0;
     while (true) {
-        while (!freeQueue_.pop(img))
+        while (!free_queue_.pop(img))
             ;
         img.frameNumber = currentFrameNumber;
         while (true) {
@@ -54,7 +54,7 @@ void Receiver::ReceivePackets(const std::string &node, const std::string &port) 
         }
         currentFrameNumber = header.frameNumber;
         numPacketsReceived = 0;
-        while (!dataQueue_.push(img))
+        while (!data_queue_.push(img))
             ;
         // fmt::print("free: {} data: {}\n", freeQueue.sizeGuess(),
         //            dataQueue.sizeGuess());
@@ -66,11 +66,11 @@ void Receiver::StreamImages(const std::string &endpoint) {
     Image img;
     Streamer strm(endpoint);
     while (true) {
-        while (!dataQueue_.pop(img))
+        while (!data_queue_.pop(img))
             ;
         strm.send(img, FRAME_SIZE);
         fmt::print("Streamed img {}\n", img.frameNumber);
-        while (!freeQueue_.push(img))
+        while (!free_queue_.push(img))
             ;
     }
 }

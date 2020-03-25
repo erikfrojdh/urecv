@@ -2,10 +2,13 @@ import zmq
 import numpy as np
 import matplotlib.pyplot as plt
 plt.ion()
+
+# endpoint =  "tcp://localhost:4545"
+endpoint = "ipc:///tmp/987"
 bitmask = np.array([0x3FFF], dtype=np.uint16)
 context = zmq.Context()
 socket = context.socket(zmq.SUB)
-socket.connect("tcp://localhost:4545")
+socket.connect(endpoint)
 socket.setsockopt(zmq.SUBSCRIBE, b"")
 
 n_frames = 10

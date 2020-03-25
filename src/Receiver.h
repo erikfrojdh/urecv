@@ -4,8 +4,8 @@
 
 class Receiver{
     size_t frame_queue_size_;
-    SimpleQueue<Image> freeQueue_;
-    SimpleQueue<Image> dataQueue_;
+    SimpleQueue<Image> free_queue_;
+    SimpleQueue<Image> data_queue_;
     std::byte *data_;
     void fillFreeQueue();
 public:

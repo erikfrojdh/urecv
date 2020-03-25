@@ -8,10 +8,10 @@ template <typename T> class SimpleQueue {
     alignas(hardware_destructive_interference_size) std::atomic<uint32_t> readIndex{0};
     alignas(hardware_destructive_interference_size) std::atomic<uint32_t> writeIndex{0};
     std::size_t size;
-    T *records;
+    T *records_;
   public:
-    SimpleQueue(uint32_t qsize) : size(qsize+1), records(new T[size]) {}
-    ~SimpleQueue() { delete[] records; }
+    SimpleQueue(uint32_t qsize) : size(qsize+1), records_(new T[size]) {}
+    ~SimpleQueue() { delete[] records_; }
 
     std::size_t  sizeGuess() const {
         int ret = writeIndex.load(std::memory_order_acquire) -
@@ -29,7 +29,7 @@ template <typename T> class SimpleQueue {
             nextRecord = 0;
         }
         if (nextRecord != writeIndex.load(std::memory_order_acquire)) {
-            records[currentWrite] = element;
+            records_[currentWrite] = element;
             writeIndex.store(nextRecord, std::memory_order_release);
             return true;
         }
@@ -45,7 +45,7 @@ template <typename T> class SimpleQueue {
         if (nextRecord == size) {
             nextRecord = 0;
         }
-        record = records[currentRead];
+        record = records_[currentRead];
         readIndex.store(nextRecord, std::memory_order_release);
         return true;
     }
