@@ -24,4 +24,5 @@ constexpr size_t PACKETS_PER_FRAME = 128;
 constexpr int PAYLOAD_SIZE = 8192;
 constexpr int PACKET_SIZE = sizeof(PacketHeader) + PAYLOAD_SIZE;
 constexpr size_t FRAME_SIZE = NROW * NCOL * sizeof(uint16_t);
+constexpr size_t DEFAULT_UDP_BUFFER_SIZE = 1024*1024*50;
 

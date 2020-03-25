@@ -8,14 +8,15 @@
 std::pair<std::string, std::string> parse_args(int argc, char *argv[]) {
     std::pair<std::string, std::string> res;
     if (argc != 2) {
-        throw std::runtime_error("Wrong number of arguments\n");
+        throw std::runtime_error("Wrong number of arguments");
     }
     std::string_view arg(argv[1]);
     if (auto pos = arg.find(':'); pos != std::string_view::npos) {
         res.first = arg.substr(0, pos);
         res.second = arg.substr(pos + 1);
     }
-    fmt::print("Node: {} port: {}\n", res.first, res.second);
+    if(res.first.empty() || res.second.empty())
+        throw std::runtime_error("Could not decode either hostname or port");
     return res;
 }
 

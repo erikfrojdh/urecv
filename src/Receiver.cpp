@@ -26,11 +26,12 @@ void Receiver::fillFreeQueue() {
 void Receiver::ReceivePackets(const std::string &node, const std::string &port) {
     pin_this_thread(1);
     set_realtime_priority();
+    fmt::print("Listening to: {}:{}\n", node, port);
     std::byte packet_buffer[PACKET_SIZE];
     PacketHeader header{};
     Image img;
     UdpSocket sock(node, port, PACKET_SIZE);
-    sock.setBufferSize(1024*1024*50);
+    sock.setBufferSize(DEFAULT_UDP_BUFFER_SIZE);
     fmt::print("UDP buffer size: {} MB\n", sock.bufferSize()/(1024.*1024.));
     sock.ReceivePacket(packet_buffer, header);
     uint64_t currentFrameNumber = header.frameNumber;
