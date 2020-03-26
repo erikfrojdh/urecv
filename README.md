@@ -25,10 +25,10 @@ Build
 -----------------
 
 ```bash
-    git clone https://github.com/erikfrojdh/urecv.git
-    mkdir build && cd build
-    cmake ../urecv
-    make -j4
+git clone https://github.com/erikfrojdh/urecv.git
+mkdir build && cd build
+cmake ../urecv
+make -j4
 
 ```
 
@@ -36,13 +36,12 @@ Usage
 -----------
 
 ```bash
+#Listen to udp packets on 193.168.1.29 port 50001
+./urecv 192.168.1.29:50001 
 
-    #Listen to udp packets on 193.168.1.29 port 50001
-    ./urecv 192.168.1.29:50001 
-
-    #optional zmq endpoint
-    ./urecv 192.168.1.29:50001 tcp://*:4545
-    ./urecv 192.168.1.29:50001 ipc:///tmp/987
+#optional zmq endpoint
+./urecv 192.168.1.29:50001 tcp://*:4545
+./urecv 192.168.1.29:50001 ipc:///tmp/987
 
 ```
 
