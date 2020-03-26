@@ -52,6 +52,7 @@ Even though the idea of this project is exploratory rather than making productio
 
  * Making thread pinning configurable 
  * Potentially add blocking push/pop to the queue
+ * Tests, tests, tests...
 
 
 Bugs/Limitations
