@@ -11,7 +11,6 @@ class Receiver{
 public:
     Receiver(size_t frame_queue_size = QUEUE_SIZE);
     ~Receiver();
-    void ReceivePackets(const std::string &node, const std::string &port);
-    void StreamImages(const std::string &endpoint);
-
+    void receivePackets(const std::string &node, const std::string &port);
+    void streamImages(const std::string &endpoint);
 };

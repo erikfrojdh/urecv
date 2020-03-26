@@ -11,19 +11,18 @@ UdpSocket::UdpSocket(const std::string &node, const std::string &port,
     : packet_size(packet_size) {
     // open socket
     struct addrinfo hints {};
-    memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_DGRAM;
     hints.ai_flags = AI_PASSIVE | AI_ADDRCONFIG;
-    struct addrinfo *res = nullptr;
+    struct addrinfo *res{nullptr};
     if (getaddrinfo(node.c_str(), port.c_str(), &hints, &res))
-        throw std::runtime_error("Get addrinfo failed");
+        throw std::runtime_error("Get getaddrinfo failed");
     sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (sockfd == -1)
-        throw std::runtime_error("Failed to open socket\n");
+        throw std::runtime_error("Failed to open socket");
     if (bind(sockfd, res->ai_addr, res->ai_addrlen) == -1) {
         close(sockfd);
-        throw std::runtime_error("failed to bind socket\n");
+        throw std::runtime_error("Failed to bind socket");
     }
     freeaddrinfo(res);
 }
@@ -33,7 +32,7 @@ UdpSocket::~UdpSocket() {
     close(sockfd);
 }
 
-void UdpSocket::ReceivePacket(void *dst, PacketHeader &header) {
+void UdpSocket::receivePacket(void *dst, PacketHeader &header) {
     while (recvfrom(sockfd, dst, packet_size, 0, nullptr, nullptr) !=
            packet_size)
         ;

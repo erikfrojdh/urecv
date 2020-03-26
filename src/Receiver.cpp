@@ -23,7 +23,7 @@ void Receiver::fillFreeQueue() {
     }
 }
 
-void Receiver::ReceivePackets(const std::string &node, const std::string &port) {
+void Receiver::receivePackets(const std::string &node, const std::string &port) {
     pin_this_thread(1);
     set_realtime_priority();
     fmt::print("Listening to: {}:{}\n", node, port);
@@ -33,7 +33,7 @@ void Receiver::ReceivePackets(const std::string &node, const std::string &port) 
     UdpSocket sock(node, port, PACKET_SIZE);
     sock.setBufferSize(DEFAULT_UDP_BUFFER_SIZE);
     fmt::print("UDP buffer size: {} MB\n", sock.bufferSize()/(1024.*1024.));
-    sock.ReceivePacket(packet_buffer, header);
+    sock.receivePacket(packet_buffer, header);
     uint64_t currentFrameNumber = header.frameNumber;
     int numPacketsReceived = 0;
     while (true) {
@@ -44,7 +44,7 @@ void Receiver::ReceivePackets(const std::string &node, const std::string &port) 
             memcpy(img.data + PAYLOAD_SIZE * numPacketsReceived,
                    packet_buffer + sizeof(PacketHeader), PAYLOAD_SIZE);
             ++numPacketsReceived;
-            sock.ReceivePacket(packet_buffer, header);
+            sock.receivePacket(packet_buffer, header);
             if (currentFrameNumber != header.frameNumber)
                 break;
         }
@@ -61,7 +61,7 @@ void Receiver::ReceivePackets(const std::string &node, const std::string &port) 
     }
 }
 
-void Receiver::StreamImages(const std::string &endpoint) {
+void Receiver::streamImages(const std::string &endpoint) {
     pin_this_thread(2);
     Image img;
     Streamer strm(endpoint);
