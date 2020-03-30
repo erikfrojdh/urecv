@@ -2,6 +2,8 @@
 #include "Streamer.h"
 #include "UdpSocket.h"
 #include <fmt/format.h>
+#include <chrono>
+#include <thread>
 
 Receiver::Receiver(size_t frame_queue_size)
     : frame_queue_size_(frame_queue_size), free_queue_(frame_queue_size_),
@@ -67,7 +69,7 @@ void Receiver::streamImages(const std::string &endpoint) {
     Streamer strm(endpoint);
     while (true) {
         while (!data_queue_.pop(img))
-            ;
+            std::this_thread::sleep_for(std::chrono::microseconds(100));
         strm.send(img, FRAME_SIZE);
         fmt::print("Streamed img {}\n", img.frameNumber);
         while (!free_queue_.push(img))

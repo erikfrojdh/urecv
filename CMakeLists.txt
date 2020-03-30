@@ -7,7 +7,7 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "No build type selected, default to Release")
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type (default Release)" FORCE)
 endif()
-
+option(RX_USE_TESTS "Build tests" ON)
 option(RX_USE_SANITIZER "Sanitizers for debugging" OFF)
 if(RX_USE_SANITIZER)
   set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=thread")
@@ -15,8 +15,9 @@ if(RX_USE_SANITIZER)
 endif(RX_USE_SANITIZER)
 
 find_package(fmt REQUIRED)
-add_executable(urecv src/main.cpp src/Receiver.cpp src/UdpSocket.cpp src/Streamer.cpp src/utils.cpp)
-target_compile_options(urecv PRIVATE 
+
+add_library(rxStatic STATIC src/Receiver.cpp src/UdpSocket.cpp src/Streamer.cpp src/utils.cpp)
+target_compile_options(rxStatic INTERFACE 
                             -Wall
                             -Wextra
                             -Wshadow
@@ -36,6 +37,11 @@ target_compile_options(urecv PRIVATE
                             -Wpedantic
 )
 
+target_link_libraries(rxStatic PUBLIC fmt pthread zmq)
 
-target_link_libraries(urecv PUBLIC fmt pthread zmq)
+add_executable(urecv src/main.cpp)
+target_link_libraries(urecv PUBLIC rxStatic)
 
+if(RX_USE_TESTS)
+  add_subdirectory(tests)
+endif(RX_USE_TESTS)
