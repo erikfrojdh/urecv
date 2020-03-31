@@ -9,7 +9,8 @@ int main(int argc, char *argv[]) {
         auto [node, port, endpoint] = parse_args(argc, argv);
         Receiver r;
         std::thread receive_thread(&Receiver::receivePackets, &r, node, port);
-        std::thread stream_thread(&Receiver::streamImages, &r, endpoint);
+        std::thread stream_thread(&Receiver::writeImages, &r, "test");
+        // std::thread stream_thread(&Receiver::streamImages, &r, endpoint);
         receive_thread.join();
         stream_thread.join();
     } catch (const std::runtime_error &e) {

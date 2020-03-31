@@ -16,7 +16,7 @@ endif(RX_USE_SANITIZER)
 
 find_package(fmt REQUIRED)
 
-add_library(rxStatic STATIC src/Receiver.cpp src/UdpSocket.cpp src/Streamer.cpp src/utils.cpp)
+add_library(rxStatic STATIC src/Receiver.cpp src/UdpSocket.cpp src/Streamer.cpp src/utils.cpp src/FileWriterDirect.cpp)
 target_compile_options(rxStatic INTERFACE 
                             -Wall
                             -Wextra
@@ -41,6 +41,20 @@ target_link_libraries(rxStatic PUBLIC fmt pthread zmq)
 
 add_executable(urecv src/main.cpp)
 target_link_libraries(urecv PUBLIC rxStatic)
+
+add_executable(ftest src/ftest.cpp)
+target_link_libraries(ftest PUBLIC rxStatic)
+
+set( PYTHON_FILES
+    read_binary.py
+    zmqtest.py
+)
+foreach(FILE ${PYTHON_FILES})
+    configure_file( python/${FILE}  
+    ${CMAKE_BINARY_DIR}/${FILE}  )
+
+endforeach(FILE ${PYTHON_FILES})
+
 
 if(RX_USE_TESTS)
   add_subdirectory(tests)
