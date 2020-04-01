@@ -48,6 +48,7 @@ target_link_libraries(ftest PUBLIC rxStatic)
 
 set( PYTHON_FILES
     read_binary.py
+    read_raw.py
     zmqtest.py
 )
 foreach(FILE ${PYTHON_FILES})
