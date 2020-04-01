@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <cstddef>
 void pin_this_thread(int i);
 void set_realtime_priority();
 void direct_input();
