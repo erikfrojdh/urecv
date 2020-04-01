@@ -28,15 +28,22 @@ UdpSocket::UdpSocket(const std::string &node, const std::string &port,
 }
 
 UdpSocket::~UdpSocket() {
-    shutdown(sockfd, SHUT_RDWR);
-    close(sockfd);
+    shutdown();
+    ::close(sockfd);
+    sockfd = -1;
 }
 
-void UdpSocket::receivePacket(void *dst, PacketHeader &header) {
-    while (recvfrom(sockfd, dst, packet_size, 0, nullptr, nullptr) !=
-           packet_size)
-        ;
-    memcpy(&header, dst, sizeof(header));
+void UdpSocket::shutdown(){
+    ::shutdown(sockfd, SHUT_RDWR);
+}
+
+bool UdpSocket::receivePacket(void *dst, PacketHeader &header) {
+    auto rc = recvfrom(sockfd, dst, packet_size, 0, nullptr, nullptr);
+    if(rc == packet_size){
+        memcpy(&header, dst, sizeof(header));
+        return true;
+    }
+    return false;
 }
 
 void UdpSocket::setBufferSize(size_t size) {

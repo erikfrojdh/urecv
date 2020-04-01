@@ -12,10 +12,13 @@ class FileWriterDirect {
     size_t meta_size_;
     std::string basename_;
     void open(const std::string& fname);
+    void close();
     void allocate_meta();
     void write_meta();
+    std::string currentFname();
   public:
     FileWriterDirect(const std::string &basename);
     ~FileWriterDirect();
     void write(const Image& img);
+
 };

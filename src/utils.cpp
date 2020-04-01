@@ -6,6 +6,9 @@
 #include <string_view>
 #include <thread>
 
+#include <termios.h>
+#include <unistd.h>
+
 Args parse_args(int argc, char *argv[]) {
     Args res;
     if (!(argc == 2 || argc == 3))
@@ -37,4 +40,13 @@ void set_realtime_priority() {
     if (ret)
         fmt::print(fg(fmt::color::yellow),
                    "Warning could not set thread priority!\n");
+}
+
+void direct_input() {
+    struct termios ctrl;
+    tcgetattr(STDIN_FILENO, &ctrl);
+    ctrl.c_lflag &=
+        ~ICANON;           // turning off canonical mode makes input unbuffered
+    ctrl.c_lflag &= ~ECHO; // turn off ech
+    tcsetattr(STDIN_FILENO, TCSANOW, &ctrl);
 }

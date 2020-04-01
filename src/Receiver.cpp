@@ -1,18 +1,28 @@
 #include "Receiver.h"
-#include "Streamer.h"
 #include "FileWriterDirect.h"
+#include "Streamer.h"
 #include "UdpSocket.h"
 #include <chrono>
+#include <cstdlib>
+#include <fmt/color.h>
 #include <fmt/format.h>
 #include <thread>
-#include <cstdlib>
 
-Receiver::Receiver(size_t frame_queue_size)
+using namespace std::literals;
+
+Receiver::Receiver(const std::string &node, const std::string &port,
+                   size_t frame_queue_size)
     : frame_queue_size_(frame_queue_size), free_queue_(frame_queue_size_),
       data_queue_(frame_queue_size_) {
+    sock = std::make_unique<UdpSocket>(node, port, PACKET_SIZE);
+    fmt::print("Listening to: {}:{}\n", node, port);
+    sock->setBufferSize(DEFAULT_UDP_BUFFER_SIZE);
+    fmt::print("UDP buffer size: {} MB\n",
+               sock->bufferSize() / (1024. * 1024.));
 
-    //O_DIRECT needs aligned data 
-    data_ = static_cast<std::byte*>(std::aligned_alloc(IO_ALIGNMENT, FRAME_SIZE*frame_queue_size_));
+    // O_DIRECT needs aligned data
+    data_ = static_cast<std::byte *>(
+        std::aligned_alloc(IO_ALIGNMENT, FRAME_SIZE * frame_queue_size_));
     fillFreeQueue();
 }
 
@@ -27,29 +37,24 @@ void Receiver::fillFreeQueue() {
     }
 }
 
-void Receiver::receivePackets(const std::string &node,
-                              const std::string &port) {
-    pin_this_thread(1);
+void Receiver::receivePackets(int cpu) {
+    pin_this_thread(cpu);
     set_realtime_priority();
-    fmt::print("Listening to: {}:{}\n", node, port);
     std::byte packet_buffer[PACKET_SIZE];
     PacketHeader header{};
     Image img;
-    UdpSocket sock(node, port, PACKET_SIZE);
-    sock.setBufferSize(DEFAULT_UDP_BUFFER_SIZE);
-    fmt::print("UDP buffer size: {} MB\n", sock.bufferSize() / (1024. * 1024.));
-    sock.receivePacket(packet_buffer, header);
+    sock->receivePacket(packet_buffer, header); // waits here for data
     uint64_t currentFrameNumber = header.frameNumber;
     int numPacketsReceived = 0;
-    while (true) {
+    while (!stopped_) {
         while (!free_queue_.pop(img))
             ;
         img.frameNumber = currentFrameNumber;
-        while (true) {
+        while (!stopped_) {
             memcpy(img.data + PAYLOAD_SIZE * numPacketsReceived,
                    packet_buffer + sizeof(PacketHeader), PAYLOAD_SIZE);
             ++numPacketsReceived;
-            sock.receivePacket(packet_buffer, header);
+            sock->receivePacket(packet_buffer, header); // waits here for data
             if (currentFrameNumber != header.frameNumber)
                 break;
         }
@@ -62,6 +67,10 @@ void Receiver::receivePackets(const std::string &node,
         while (!data_queue_.push(img))
             ;
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(
+        1000)); // make sure we have time to sink images
+    receiver_done_ = true;
+    fmt::print("UDP thread done\n");
 }
 
 void Receiver::streamImages(const std::string &endpoint) {
@@ -70,7 +79,7 @@ void Receiver::streamImages(const std::string &endpoint) {
     Streamer strm(endpoint);
     while (true) {
         while (!data_queue_.pop(img))
-            std::this_thread::sleep_for(std::chrono::microseconds(100));
+            std::this_thread::sleep_for(100us);
         strm.send(img, FRAME_SIZE);
         fmt::print("Streamed img {}\n", img.frameNumber);
         while (!free_queue_.push(img))
@@ -82,11 +91,20 @@ void Receiver::writeImages(const std::string &basename) {
     pin_this_thread(2);
     Image img;
     FileWriterDirect writer(basename);
-    while (true) {
-        while (!data_queue_.pop(img))
-            std::this_thread::sleep_for(std::chrono::microseconds(100));
-        writer.write(img);
-        while (!free_queue_.push(img))
-            ;
+    while (!receiver_done_) {
+        if (data_queue_.pop(img)) {
+            writer.write(img);
+            free_queue_.push(img); // no need to loop since size should be ok
+        } else {
+            std::this_thread::sleep_for(
+                100us); // if no images in buffer we can afford to wait
+        }
     }
+    fmt::print(fg(fmt::color::green), "Writer stopped");
+    fmt::print("\n");
+}
+
+void Receiver::finish() {
+    stopped_ = true;
+    sock->shutdown();
 }

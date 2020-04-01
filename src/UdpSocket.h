@@ -1,3 +1,4 @@
+#pragma once
 #include "defs.h"
 #include <string>
 class UdpSocket{
@@ -6,7 +7,8 @@ class UdpSocket{
 public:
     UdpSocket(const std::string& node, const std::string& port, int packet_size);
     ~UdpSocket();
-    void receivePacket(void *dst, PacketHeader& header);
+    bool receivePacket(void *dst, PacketHeader& header);
     void setBufferSize(size_t size);
     size_t bufferSize() const;
+    void shutdown();
 };

@@ -2,6 +2,7 @@
 #include <string>
 void pin_this_thread(int i);
 void set_realtime_priority();
+void direct_input();
 struct Image {
     int64_t frameNumber = -1;
     std::byte *data = nullptr;

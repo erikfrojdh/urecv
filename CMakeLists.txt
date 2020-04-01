@@ -12,6 +12,7 @@ option(RX_USE_SANITIZER "Sanitizers for debugging" OFF)
 if(RX_USE_SANITIZER)
   set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=thread")
   set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=thread")
+  set(CMAKE_BUILD_TYPE "Debug")
 endif(RX_USE_SANITIZER)
 
 find_package(fmt REQUIRED)
