@@ -1,6 +1,6 @@
 # urecv - A small receiver for a single jungfrau module
 
-This is a small and simple receiver for a single JUNGFRAU module. It's very much in alpha stage so use it at your own risk. Actually so far it has **only been tested with the virtual server**. 
+This is a small and simple receiver for a single JUNGFRAU module. It's very much in alpha stage so use it at your own risk. It supports streaming out data on zmq or writing to disk.
 
 Dependencies
 --------------
@@ -11,10 +11,10 @@ Dependencies
 Features
 -----------
 
-* Small, currently ~325 sloc
+* Small, currently ~530 sloc
 * Receives UDP packets from Jungfrau 
-* Streams out data over zmq 
-* Sets reciver thread prioiory 
+* Streams out data over zmq or writes to file
+* Sets receiver thread priority 
 * Pin threads to specific core
 * Includes lock free spsc queue (based on [folly/ProducerConsumerQueue](https://github.com/facebook/folly/blob/master/folly/ProducerConsumerQueue.h))
 
@@ -37,11 +37,16 @@ Usage
 
 ```bash
 #Listen to udp packets on 193.168.1.29 port 50001
+#This receives frames put them in a buffer and later zero out
+#use
 ./urecv 192.168.1.29:50001 
 
-#optional zmq endpoint
-./urecv 192.168.1.29:50001 tcp://*:4545
-./urecv 192.168.1.29:50001 ipc:///tmp/987
+#Stream out data over zmq
+./urecv 192.168.1.29:50001 -s tcp://*:4545
+./urecv 192.168.1.29:50001 -s ipc:///tmp/987
+
+#Write data to file writes to basename_0.bin basename_1.bin etc
+./urecv 192.168.1.29:50001 -w basename
 
 ```
 
@@ -51,7 +56,6 @@ Roadmap
 Even though the idea of this project is exploratory rather than making production grade software there are a few things in the pipeline. 
 
  * Making thread pinning configurable 
- * Potentially add blocking push/pop to the queue
  * Tests, tests, tests...
 
 
