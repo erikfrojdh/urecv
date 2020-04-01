@@ -51,6 +51,43 @@ void Receiver::receivePackets(int cpu) {
             ;
         img.frameNumber = currentFrameNumber;
         while (!stopped_) {
+            fmt::print("{}, ", header.packetNumber);
+            memcpy(img.data + PAYLOAD_SIZE * header.packetNumber,
+                   packet_buffer + sizeof(PacketHeader), PAYLOAD_SIZE);
+            ++numPacketsReceived;
+            sock->receivePacket(packet_buffer, header); // waits here for data
+            if (currentFrameNumber != header.frameNumber)
+                break;
+        }
+        if (numPacketsReceived != PACKETS_PER_FRAME) {
+            fmt::print("Frame: {} lost {} pkts\n", currentFrameNumber,
+                       PACKETS_PER_FRAME - numPacketsReceived);
+        }
+        currentFrameNumber = header.frameNumber;
+        numPacketsReceived = 0;
+        while (!data_queue_.push(img))
+            ;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(
+        1000)); // make sure we have time to sink images
+    receiver_done_ = true;
+    fmt::print("UDP thread done\n");
+}
+
+void Receiver::receivePacketsOrder(int cpu) {
+    pin_this_thread(cpu);
+    set_realtime_priority();
+    std::byte packet_buffer[PACKET_SIZE];
+    PacketHeader header{};
+    Image img;
+    sock->receivePacket(packet_buffer, header); // waits here for data
+    uint64_t currentFrameNumber = header.frameNumber;
+    int numPacketsReceived = 0;
+    while (!stopped_) {
+        while (!free_queue_.pop(img))
+            ;
+        img.frameNumber = currentFrameNumber;
+        while (!stopped_) {
             fmt::print("pnum: {}\n", header.packetNumber);
             memcpy(img.data + PAYLOAD_SIZE * numPacketsReceived,
                    packet_buffer + sizeof(PacketHeader), PAYLOAD_SIZE);
