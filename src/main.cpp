@@ -8,7 +8,7 @@
 
 // usage ./urecv 192.162.1.1:50001
 int main(int argc, char *argv[]) {
-    direct_input();
+    // direct_input();
     try {
         auto [node, port, endpoint] = parse_args(argc, argv);
         Receiver r(node, port);
@@ -31,5 +31,5 @@ int main(int argc, char *argv[]) {
     }
 
     fmt::print(fg(fmt::color::azure), "Bye!\n");
-    reset_terminal();
+    // reset_terminal();
 }

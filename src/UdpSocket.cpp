@@ -42,6 +42,8 @@ bool UdpSocket::receivePacket(void *dst, PacketHeader &header) {
     if(rc == packet_size){
         memcpy(&header, dst, sizeof(header));
         return true;
+    }else{
+        fmt::print("Warning: read {} bytes\n", rc);
     }
     return false;
 }
