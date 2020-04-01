@@ -13,8 +13,8 @@ int main(int argc, char *argv[]) {
         auto [node, port, endpoint] = parse_args(argc, argv);
         Receiver r(node, port);
         std::thread receive_thread(&Receiver::receivePackets, &r, 1);
-        std::thread process_thread(&Receiver::writeImages, &r, "test");
-        // std::thread stream_thread(&Receiver::streamImages, &r, endpoint);
+        // std::thread process_thread(&Receiver::writeImages, &r, "test");
+        std::thread process_thread(&Receiver::streamImages, &r, endpoint);
 
         while (true) {
             auto key = std::cin.get();
