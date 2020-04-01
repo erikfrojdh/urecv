@@ -31,4 +31,5 @@ int main(int argc, char *argv[]) {
     }
 
     fmt::print(fg(fmt::color::azure), "Bye!\n");
+    reset_terminal();
 }

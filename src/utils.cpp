@@ -50,3 +50,12 @@ void direct_input() {
     ctrl.c_lflag &= ~ECHO; // turn off ech
     tcsetattr(STDIN_FILENO, TCSANOW, &ctrl);
 }
+
+void reset_terminal() {
+    struct termios ctrl;
+    tcgetattr(STDIN_FILENO, &ctrl);
+    ctrl.c_lflag &=
+        ICANON;           // turning off canonical mode makes input unbuffered
+    ctrl.c_lflag &= ECHO; // turn off ech
+    tcsetattr(STDIN_FILENO, TCSANOW, &ctrl);
+}
