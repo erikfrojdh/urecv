@@ -21,6 +21,6 @@ class Receiver {
     void receivePackets(int cpu);
     void receivePacketsOrder(int cpu);
     void streamImages(const std::string &endpoint);
-    void writeImages(const std::string &basename);
+    void writeImages(const std::string &basename, int cpu);
     void finish();
 };

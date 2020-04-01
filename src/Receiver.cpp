@@ -123,8 +123,8 @@ void Receiver::streamImages(const std::string &endpoint) {
     }
 }
 
-void Receiver::writeImages(const std::string &basename) {
-    pin_this_thread(2);
+void Receiver::writeImages(const std::string &basename, int cpu) {
+    pin_this_thread(cpu);
     Image img;
     FileWriterDirect writer(basename);
     while (!receiver_done_) {

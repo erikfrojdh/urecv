@@ -12,9 +12,9 @@ int main(int argc, char *argv[]) {
     try {
         auto [node, port, endpoint] = parse_args(argc, argv);
         Receiver r(node, port);
-        std::thread receive_thread(&Receiver::receivePackets, &r, 1);
-        // std::thread process_thread(&Receiver::writeImages, &r, "test");
-        std::thread process_thread(&Receiver::streamImages, &r, endpoint);
+        std::thread receive_thread(&Receiver::receivePackets, &r, 2);
+        std::thread process_thread(&Receiver::writeImages, &r, "test", 7);
+        // std::thread process_thread(&Receiver::streamImages, &r, endpoint);
 
         while (true) {
             auto key = std::cin.get();
