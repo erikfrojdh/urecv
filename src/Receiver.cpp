@@ -46,6 +46,8 @@ void Receiver::receivePackets(int cpu) {
     sock->receivePacket(packet_buffer, header); // waits here for data
     uint64_t currentFrameNumber = header.frameNumber;
     int numPacketsReceived = 0;
+    int64_t totalPacketsLost = 0;
+    int64_t totalFramesReceived = 0;
     while (!stopped_) {
         while (!free_queue_.pop(img))
             ;
@@ -59,13 +61,20 @@ void Receiver::receivePackets(int cpu) {
                 break;
         }
         if (numPacketsReceived != PACKETS_PER_FRAME) {
+            auto lost = PACKETS_PER_FRAME - numPacketsReceived;
             fmt::print("Frame: {} lost {} pkts\n", currentFrameNumber,
-                       PACKETS_PER_FRAME - numPacketsReceived);
+                       lost);
+            totalPacketsLost += lost;
         }
         currentFrameNumber = header.frameNumber;
         numPacketsReceived = 0;
         while (!data_queue_.push(img))
             ;
+
+        totalFramesReceived += 1;
+        if(totalFramesReceived%1000 == 0){
+            fmt::print("Received: {} frames, lost {} packets\n", totalFramesReceived, totalPacketsLost);
+        }
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(
         1000)); // make sure we have time to sink images
@@ -73,53 +82,18 @@ void Receiver::receivePackets(int cpu) {
     fmt::print("UDP thread done\n");
 }
 
-void Receiver::receivePacketsOrder(int cpu) {
+void Receiver::streamImages(const std::string &endpoint, int cpu) {
     pin_this_thread(cpu);
-    set_realtime_priority();
-    std::byte packet_buffer[PACKET_SIZE];
-    PacketHeader header{};
-    Image img;
-    sock->receivePacket(packet_buffer, header); // waits here for data
-    uint64_t currentFrameNumber = header.frameNumber;
-    int numPacketsReceived = 0;
-    while (!stopped_) {
-        while (!free_queue_.pop(img))
-            ;
-        img.frameNumber = currentFrameNumber;
-        while (!stopped_) {
-            memcpy(img.data + PAYLOAD_SIZE * numPacketsReceived,
-                   packet_buffer + sizeof(PacketHeader), PAYLOAD_SIZE);
-            ++numPacketsReceived;
-            sock->receivePacket(packet_buffer, header); // waits here for data
-            if (currentFrameNumber != header.frameNumber)
-                break;
-        }
-        if (numPacketsReceived != PACKETS_PER_FRAME) {
-            fmt::print("Frame: {} lost {} pkts\n", currentFrameNumber,
-                       PACKETS_PER_FRAME - numPacketsReceived);
-        }
-        currentFrameNumber = header.frameNumber;
-        numPacketsReceived = 0;
-        while (!data_queue_.push(img))
-            ;
-    }
-    std::this_thread::sleep_for(std::chrono::milliseconds(
-        1000)); // make sure we have time to sink images
-    receiver_done_ = true;
-    fmt::print("UDP thread done\n");
-}
-
-void Receiver::streamImages(const std::string &endpoint) {
-    pin_this_thread(2);
     Image img;
     Streamer strm(endpoint);
-    while (true) {
-        while (!data_queue_.pop(img))
+    while (!receiver_done_) {
+        if (data_queue_.pop(img)) {
+            strm.send(img, FRAME_SIZE);
+            free_queue_.push(img);
+            fmt::print("Streamed img {}\n", img.frameNumber);
+        } else {
             std::this_thread::sleep_for(100us);
-        strm.send(img, FRAME_SIZE);
-        fmt::print("Streamed img {}\n", img.frameNumber);
-        while (!free_queue_.push(img))
-            ;
+        }
     }
 }
 
@@ -132,12 +106,25 @@ void Receiver::writeImages(const std::string &basename, int cpu) {
             writer.write(img);
             free_queue_.push(img); // no need to loop since size should be ok
         } else {
-            std::this_thread::sleep_for(
-                100us); // if no images in buffer we can afford to wait
+            std::this_thread::sleep_for(100us);
+        }
+        fmt::print(fg(fmt::color::green), "Writer stopped\n");
+    }
+}
+
+void Receiver::zeroImages(int cpu) {
+    pin_this_thread(cpu);
+    Image img;
+    while (!receiver_done_) {
+        if (data_queue_.pop(img)) {
+            img.frameNumber = 0;
+            memset(img.data, 0, FRAME_SIZE);
+            free_queue_.push(img); // no need to loop since size should be ok
+        } else {
+            std::this_thread::sleep_for(100us);
         }
     }
-    fmt::print(fg(fmt::color::green), "Writer stopped");
-    fmt::print("\n");
+    fmt::print(fg(fmt::color::green), "Zero stopped\n");
 }
 
 void Receiver::finish() {

@@ -6,15 +6,34 @@
 #include "utils.h"
 #include <iostream>
 
-// usage ./urecv 192.162.1.1:50001
+// usage
+// ./urecv 192.162.1.1:50001
+// ./urecv 192.162.1.1:50001 -s tcp://*:4545
+// ./urecv 192.162.1.1:50001 -w test
+
 int main(int argc, char *argv[]) {
     // direct_input();
     try {
-        auto [node, port, endpoint] = parse_args(argc, argv);
+        auto [node, port, endpoint, fname] = parse_args(argc, argv);
         Receiver r(node, port);
-        std::thread receive_thread(&Receiver::receivePackets, &r, 2);
-        std::thread process_thread(&Receiver::writeImages, &r, "test", 7);
-        // std::thread process_thread(&Receiver::streamImages, &r, endpoint);
+
+        std::vector<std::thread> threads;
+        // std::thread receive_thread(&Receiver::receivePackets, &r, 0);
+        threads.emplace_back(&Receiver::receivePackets, &r, 0);
+        if (!endpoint.empty() && fname.empty()) {
+            // std::thread process_thread(&Receiver::streamImages, &r, endpoint,
+            // 1);
+            threads.emplace_back(&Receiver::streamImages, &r, endpoint, 1);
+        } else if (endpoint.empty() && !fname.empty()) {
+            // std::thread process_thread(&Receiver::writeImages, &r, fname, 1);
+            threads.emplace_back(&Receiver::writeImages, &r, fname, 1);
+        } else if (endpoint.empty() && fname.empty()) {
+            threads.emplace_back(&Receiver::zeroImages, &r, 1);
+        } else {
+            throw std::runtime_error("Something went wrong with the parsing");
+        }
+
+        // //
 
         while (true) {
             auto key = std::cin.get();
@@ -24,8 +43,8 @@ int main(int argc, char *argv[]) {
                 break;
             }
         }
-        receive_thread.join();
-        process_thread.join();
+        for (auto &&t : threads)
+            t.join();
     } catch (const std::runtime_error &e) {
         fmt::print(fg(fmt::color::red), "ERROR: {}\n", e.what());
     }

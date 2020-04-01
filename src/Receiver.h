@@ -19,8 +19,8 @@ class Receiver {
              size_t frame_queue_size = QUEUE_SIZE);
     ~Receiver();
     void receivePackets(int cpu);
-    void receivePacketsOrder(int cpu);
-    void streamImages(const std::string &endpoint);
+    void streamImages(const std::string &endpoint, int cpu);
     void writeImages(const std::string &basename, int cpu);
+    void zeroImages(int cpu);
     void finish();
 };
