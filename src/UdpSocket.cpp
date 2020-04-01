@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <fmt/format.h>
 
 UdpSocket::UdpSocket(const std::string &node, const std::string &port,
                      int packet_size)
