@@ -51,6 +51,7 @@ void Receiver::receivePackets(int cpu) {
             ;
         img.frameNumber = currentFrameNumber;
         while (!stopped_) {
+            fmt::print("pnum: {}\n", header.packetNumber);
             memcpy(img.data + PAYLOAD_SIZE * numPacketsReceived,
                    packet_buffer + sizeof(PacketHeader), PAYLOAD_SIZE);
             ++numPacketsReceived;
