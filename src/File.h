@@ -4,11 +4,10 @@
 #include "utils.h"
 #include <string>
 
-#include <fmt/format.h>
 #include <fmt/color.h>
+#include <fmt/format.h>
 
-template <typename T> 
-class File{
+template <typename T> class File {
     static constexpr auto writer_color = fmt::color::green;
     T writerImpl;
 
@@ -54,15 +53,16 @@ class File{
         writerImpl.write(meta_, meta_size_);
     }
 
-
   public:
-    File(const std::string &basename):basename_(basename){
-        allocate_meta();
-        writerImpl.open(currentFname());
+    File(const std::string &basename) : File(basename, 1000) {
+
     }
-    ~File(){
-        free(meta_);
-    }
+    File(const std::string &basename, size_t frames_per_file)
+        : frames_per_file_(frames_per_file), basename_(basename) {
+            allocate_meta();
+            writerImpl.open(currentFname());
+        }
+    ~File() { free(meta_); }
 
     void write(const Image &img) {
         if (n_written_ == frames_per_file_) {

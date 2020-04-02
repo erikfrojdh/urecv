@@ -54,8 +54,8 @@ target_link_libraries(rxStatic PUBLIC fmt pthread zmq)
 add_executable(urecv src/main.cpp)
 target_link_libraries(urecv PUBLIC rxStatic)
 
-# add_executable(ftest src/ftest.cpp)
-# target_link_libraries(ftest PUBLIC rxStatic)
+add_executable(ftest src/ftest.cpp)
+target_link_libraries(ftest PUBLIC rxStatic)
 
 set( PYTHON_FILES
     read_binary.py
