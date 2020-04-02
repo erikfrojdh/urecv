@@ -16,16 +16,17 @@
 int main(int argc, char *argv[]) {
     direct_input();
     try {
-        auto [node, port, endpoint, fname] = parse_args(argc, argv);
-        Receiver r(node, port);
+        auto args = parse_args(argc, argv);
+        Receiver r(args.node, args.port);
+        fmt::print("Pinning to: {}, and {}\n", args.cpu0, args.cpu1);
         std::vector<std::thread> threads;
-        threads.emplace_back(&Receiver::receivePackets, &r, 0);
-        if (!endpoint.empty() && fname.empty()) {
-            threads.emplace_back(&Receiver::streamImages, &r, endpoint, 1);
-        } else if (endpoint.empty() && !fname.empty()) {
-            threads.emplace_back(&Receiver::writeImages, &r, fname, 1);
-        } else if (endpoint.empty() && fname.empty()) {
-            threads.emplace_back(&Receiver::zeroImages, &r, 1);
+        threads.emplace_back(&Receiver::receivePackets, &r, args.cpu0);
+        if (!args.endpoint.empty() && args.fname.empty()) {
+            threads.emplace_back(&Receiver::streamImages, &r, args.endpoint, args.cpu1);
+        } else if (args.endpoint.empty() && !args.fname.empty()) {
+            threads.emplace_back(&Receiver::writeImages, &r, args.fname, args.cpu1);
+        } else if (args.endpoint.empty() && args.fname.empty()) {
+            threads.emplace_back(&Receiver::zeroImages, &r, args.cpu1);
         } else {
             throw std::runtime_error("Something went wrong with the parsing");
         }

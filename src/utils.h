@@ -14,5 +14,7 @@ struct Args{
     std::string port;
     std::string endpoint;
     std::string fname;
+    int cpu0{0};
+    int cpu1{1};
 };
 Args parse_args(int argc, char *argv[]);
