@@ -5,7 +5,7 @@
 
 #include "utils.h"
 #include <iostream>
-
+#include <vector>
 
 
 // usage
