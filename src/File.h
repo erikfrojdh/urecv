@@ -48,6 +48,7 @@ template <typename T> class File {
     }
     void write_meta() {
         auto npos = meta_size_ / sizeof(*meta_);
+        fmt::print("npos: {}\n", npos);
         meta_[npos - 2] = n_written_;
         meta_[npos - 1] = meta_size_;
         writerImpl.write(meta_, meta_size_);
@@ -67,8 +68,8 @@ template <typename T> class File {
 
     void write(const Image &img) {
         if (n_written_ == frames_per_file_) {
-            writerImpl.close();
-            writerImpl.open(fmt::format("{}_{}.bin", basename_, ++file_nr_));
+            close();
+            open(fmt::format("{}_{}.bin", basename_, ++file_nr_));
         }
         meta_[n_written_++] = img.frameNumber;
         writerImpl.write(img.data, FRAME_SIZE);

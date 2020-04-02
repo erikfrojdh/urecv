@@ -28,7 +28,7 @@ Receiver::Receiver(const std::string &node, const std::string &port,
     fillFreeQueue();
 }
 
-Receiver::~Receiver() { delete[] data_; }
+Receiver::~Receiver() { free(data_); }
 
 void Receiver::fillFreeQueue() {
     Image img{-1, nullptr};
@@ -106,7 +106,9 @@ void Receiver::writeImages(const std::string &basename, int cpu) {
     while (!receiver_done_) {
         if (data_queue_.pop(img)) {
             writer.write(img);
-            free_queue_.push(img); // no need to loop since size should be ok
+            if (!free_queue_.push(img)){
+                throw std::runtime_error("push free failed");
+            } // no need to loop since size should be ok
         } else {
             std::this_thread::sleep_for(100us);
         }
