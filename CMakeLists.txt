@@ -22,6 +22,7 @@ src/Receiver.cpp src/UdpSocket.cpp
 src/Streamer.cpp 
 src/utils.cpp 
 src/DirectWriter.cpp
+src/FwriteWriter.cpp
 # src/FileWriter.cpp 
 # src/FileWriterDirect.cpp
 

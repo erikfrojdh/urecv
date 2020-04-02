@@ -2,6 +2,7 @@
 
 #include "File.h"
 #include "DirectWriter.h"
+#include "FwriteWriter.h"
 #include "defs.h"
 #include "utils.h"
 
@@ -11,13 +12,22 @@
 #include <chrono>
 #include <fmt/format.h>
 
-int main(){
+int main(int argc, char* argv[]){
+    std::string fname{"test"};
+    size_t nFrames = 1000;
+    if ( argc ==2 || argc == 3 ){
+        fname = argv[1];
+    }
+    if (argc == 3){
+        nFrames = std::stoi(argv[2]);
+    }
+    fmt::print("Writing: {} frames to {}\n", nFrames, fname);
     Image img;
     //alternative to posix_memalign
     img.data = static_cast<std::byte*>(std::aligned_alloc(IO_ALIGNMENT, FRAME_SIZE));
 
-    size_t nFrames = 10000;
-    File<DirectWriter> f("test", nFrames);
+    
+    File<FwriteWriter> f(fname, nFrames);
     
     auto t0 = std::chrono::steady_clock::now();
     for(int i = 0; i<nFrames; ++i){
