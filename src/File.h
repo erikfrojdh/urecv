@@ -54,15 +54,16 @@ template <typename T> class File {
     }
 
   public:
-    File(const std::string &basename) : File(basename, 1000) {
-
-    }
+    File(const std::string &basename) : File(basename, 1000) {}
     File(const std::string &basename, size_t frames_per_file)
         : frames_per_file_(frames_per_file), basename_(basename) {
-            allocate_meta();
-            writerImpl.open(currentFname());
-        }
-    ~File() { free(meta_); }
+        allocate_meta();
+        writerImpl.open(currentFname());
+    }
+    ~File() {
+        close();
+        free(meta_);
+    }
 
     void write(const Image &img) {
         if (n_written_ == frames_per_file_) {
