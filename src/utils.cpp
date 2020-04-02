@@ -18,14 +18,14 @@ Args parse_args(int argc, char *argv[]) {
         res.node = arg.substr(0, pos);
         res.port = arg.substr(pos + 1);
     }
-    if (argc == 4){
-        if(std::string_view arg3(argv[2]); arg3 == "-s"){
+    if (argc == 4) {
+        if (std::string_view arg3(argv[2]); arg3 == "-s") {
             res.endpoint = argv[3];
-        }else if(arg3 == "-w"){
+        } else if (arg3 == "-w") {
             res.fname = argv[3];
         }
     }
-    
+
     if (res.node.empty() || res.port.empty())
         throw std::runtime_error("Could not decode either hostname or port");
     return res;
@@ -49,20 +49,18 @@ void set_realtime_priority() {
                    "Warning could not set thread priority!\n");
 }
 
-// void direct_input() {
-//     struct termios ctrl;
-//     tcgetattr(STDIN_FILENO, &ctrl);
-//     ctrl.c_lflag &=
-//         ~ICANON;           // turning off canonical mode makes input unbuffered
-//     ctrl.c_lflag &= ~ECHO; // turn off ech
-//     tcsetattr(STDIN_FILENO, TCSANOW, &ctrl);
-// }
+void direct_input() {
+    struct termios ctrl{};
+    tcgetattr(STDIN_FILENO, &ctrl);
+    ctrl.c_lflag &= ~ICANON;
+    ctrl.c_lflag &= ~ECHO;
+    tcsetattr(STDIN_FILENO, TCSANOW, &ctrl);
+}
 
-// void reset_terminal() {
-//     struct termios ctrl;
-//     tcgetattr(STDIN_FILENO, &ctrl);
-//     ctrl.c_lflag &=
-//         ICANON;           // turning off canonical mode makes input unbuffered
-//     ctrl.c_lflag &= ECHO; // turn off ech
-//     tcsetattr(STDIN_FILENO, TCSANOW, &ctrl);
-// }
+void reset_terminal() {
+    struct termios ctrl{};
+    tcgetattr(STDIN_FILENO, &ctrl);
+    ctrl.c_lflag |= ICANON;
+    ctrl.c_lflag |= ECHO;
+    tcsetattr(STDIN_FILENO, TCSANOW, &ctrl);
+}

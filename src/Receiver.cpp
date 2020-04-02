@@ -1,5 +1,6 @@
 #include "Receiver.h"
-#include "FileWriterDirect.h"
+#include "File.h"
+#include "DirectWriter.h"
 #include "Streamer.h"
 #include "UdpSocket.h"
 #include <chrono>
@@ -100,7 +101,7 @@ void Receiver::streamImages(const std::string &endpoint, int cpu) {
 void Receiver::writeImages(const std::string &basename, int cpu) {
     pin_this_thread(cpu);
     Image img;
-    FileWriterDirect writer(basename);
+    File<DirectWriter> writer(basename);
     while (!receiver_done_) {
         if (data_queue_.pop(img)) {
             writer.write(img);
@@ -108,8 +109,8 @@ void Receiver::writeImages(const std::string &basename, int cpu) {
         } else {
             std::this_thread::sleep_for(100us);
         }
-        fmt::print(fg(fmt::color::green), "Writer stopped\n");
     }
+    fmt::print(fg(fmt::color::green), "Writer stopped\n");
 }
 
 void Receiver::zeroImages(int cpu) {

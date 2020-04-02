@@ -1,24 +1,16 @@
 #pragma once
 
-#include <string>
+#include "FileWriter.h"
 #include "defs.h"
 #include "utils.h"
-class FileWriterDirect {
+#include <string>
+class FileWriterDirect final : public FileWriter {
     int fd_ = -1;
-    int64_t *meta_;
-    size_t n_written_ = 0;
-    size_t frames_per_file_ = 1000;
-    size_t file_nr_ = 0;
-    size_t meta_size_;
-    std::string basename_;
-    void open(const std::string& fname);
-    void close();
-    void allocate_meta();
-    void write_meta();
-    std::string currentFname();
-  public:
-    FileWriterDirect(const std::string &basename);
-    ~FileWriterDirect();
-    void write(const Image& img);
+    void write_impl(void *buf, size_t len) override;
+    void open_impl(const std::string &fname) override;
+    void close_impl() override;
 
+  public:
+    FileWriterDirect(const std::string& basename);
+    ~FileWriterDirect() override;
 };

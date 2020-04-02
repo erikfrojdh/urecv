@@ -17,7 +17,18 @@ endif(RX_USE_SANITIZER)
 
 find_package(fmt REQUIRED)
 
-add_library(rxStatic STATIC src/Receiver.cpp src/UdpSocket.cpp src/Streamer.cpp src/utils.cpp src/FileWriterDirect.cpp)
+set(SRC_FILES
+src/Receiver.cpp src/UdpSocket.cpp 
+src/Streamer.cpp 
+src/utils.cpp 
+src/DirectWriter.cpp
+# src/FileWriter.cpp 
+# src/FileWriterDirect.cpp
+
+
+)
+
+add_library(rxStatic STATIC ${SRC_FILES})
 target_compile_options(rxStatic INTERFACE 
                             -Wall
                             -Wextra
@@ -43,8 +54,8 @@ target_link_libraries(rxStatic PUBLIC fmt pthread zmq)
 add_executable(urecv src/main.cpp)
 target_link_libraries(urecv PUBLIC rxStatic)
 
-add_executable(ftest src/ftest.cpp)
-target_link_libraries(ftest PUBLIC rxStatic)
+# add_executable(ftest src/ftest.cpp)
+# target_link_libraries(ftest PUBLIC rxStatic)
 
 set( PYTHON_FILES
     read_binary.py
