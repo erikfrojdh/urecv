@@ -35,7 +35,8 @@ class FrameAssembler {
 
     void stop() { stopped_ = true; }
 
-    void assemble() {
+    void assemble(int cpu) {
+        pin_this_thread(cpu);
         while (!stopped_) {
             // pop one image from all, this will block
             for (int i = 0; i < images_.size(); ++i) {

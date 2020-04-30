@@ -44,6 +44,10 @@ class ImageFifo {
         return v;
     }
 
+    bool try_pop_image(ImageView& img){
+        return filled_slots.pop(img);
+    }
+
     void push_image(ImageView &v) {
         while (!filled_slots.push(v))
             ;

@@ -14,7 +14,7 @@
 constexpr auto node = "192.168.122.1";
 constexpr auto endpoint = "tcp://*:4545";
 constexpr int starting_port = 50001;
-constexpr int starting_cpu = 0;
+
 
 int main(int argc, char *argv[]) {
     direct_input();
@@ -27,25 +27,27 @@ int main(int argc, char *argv[]) {
         }
 
         urecv::FrameAssembler assembler(receivers);
-        urecv::Streamer(endpoint, assembler.fifo());
+        urecv::Streamer streamer(endpoint, assembler.fifo());
 
         // Start listening threads
+        int cpu = 0;
         std::vector<std::thread> threads;
-        for (int i = 0; i < receivers.size(); ++i) {
-            threads.emplace_back(&Receiver::receivePackets, receivers[i].get(),
-                                 starting_cpu + i);
+        for (auto & r: receivers) {
+            threads.emplace_back(&Receiver::receivePackets, r.get(),
+                                 cpu++);
         }
-
-        threads.emplace_back(&urecv::FrameAssembler::assemble, &assembler);
+        threads.emplace_back(&urecv::FrameAssembler::assemble, &assembler, cpu++);
+        threads.emplace_back(&urecv::Streamer::stream, &streamer, cpu++);
 
         // Listen for 'q'
         while (true) {
             auto key = std::cin.get();
             if (key == 'q') {
-                fmt::print(fg(fmt::color::red), "Stopping receivers\n");
+                fmt::print(fg(fmt::color::red), "Recived \'q\' aborting!\n");
                 for (auto &r : receivers)
                     r->finish();
                 assembler.stop();
+                streamer.stop();
                 break;
             }
         }
