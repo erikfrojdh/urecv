@@ -58,7 +58,7 @@ void Receiver::receivePackets(int cpu) {
         numPacketsReceived = 0;
         fifo_.push_image(img);
         totalFramesReceived += 1;
-        if (totalFramesReceived % 1 == 0) {
+        if (totalFramesReceived % PRINT_MOD == 0) {
             fmt::print("{} Received: {} frames, lost {} packets\n", cpu,
                        totalFramesReceived, totalPacketsLost);
             fmt::print("{} Free: {}, data: {}\n", cpu, fifo_.numFreeSlots(),

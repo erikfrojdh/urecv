@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 plt.ion()
 
-# endpoint =  "tcp://localhost:4545"
-endpoint = "ipc:///tmp/987"
+endpoint =  "tcp://localhost:4545"
+# endpoint = "ipc:///tmp/987"
 bitmask = np.array([0x3FFF], dtype=np.uint16)
 context = zmq.Context()
 socket = context.socket(zmq.SUB)
@@ -26,7 +26,8 @@ while(caught_frames < n_frames):
         caught_frames += 1
 
 
-
+fig, ax = plt.subplots(1,1)
+im = ax.imshow(data[5])
 
 
 # socket.disconnect()

@@ -3,7 +3,6 @@
 #include <fmt/color.h>
 #include <fmt/format.h>
 #include <stdexcept>
-#include <string_view>
 #include <thread>
 
 #include <termios.h>
@@ -17,7 +16,6 @@ void pin_this_thread(int i) {
     if (rc)
         throw std::runtime_error("Could not pin thread");
 }
-
 
 void set_realtime_priority() {
     struct sched_param params {};

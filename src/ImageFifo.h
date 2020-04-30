@@ -2,6 +2,10 @@
 #include "ImageView.h"
 #include "SimpleQueue.h"
 #include <memory>
+#include <chrono>
+#include <fmt/format.h>
+#include <fmt/color.h>
+#include <thread>
 
 //template parameter for aligned alloc????
 class ImageFifo {
@@ -41,6 +45,23 @@ class ImageFifo {
         ImageView v;
         while (!filled_slots.pop(v))
             ;
+        return v;
+    }
+    ImageView pop_image(std::chrono::nanoseconds wait) {
+        ImageView v;
+        while (!filled_slots.pop(v)){
+            std::this_thread::sleep_for(wait);
+        }
+        return v;
+    }
+
+    ImageView pop_image(std::chrono::nanoseconds wait, std::atomic<bool>& stopped) {
+        ImageView v;
+        while (!filled_slots.pop(v) && !stopped){
+            std::this_thread::sleep_for(wait);
+        }
+        if(stopped)
+            fmt::print(fg(fmt::color::rosy_brown), "STOPPED!\n");
         return v;
     }
 

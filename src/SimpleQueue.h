@@ -25,8 +25,6 @@ template <typename T> class SimpleQueue {
         return ret;
     }
 
-    // should this be reference?
-    // T is usually a pointer
     bool push(T &element) {
         auto const currentWrite = writeIndex_.load(std::memory_order_relaxed);
         auto nextRecord = currentWrite + 1;
