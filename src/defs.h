@@ -18,9 +18,10 @@ struct PacketHeader {
     uint8_t version;
 };
 constexpr size_t QUEUE_SIZE = 100;
-constexpr size_t NROW = 512;
+constexpr size_t NROW = 256;
 constexpr size_t NCOL = 1024;
-constexpr size_t PACKETS_PER_FRAME = 128;
+// constexpr size_t PACKETS_PER_FRAME = 128;
+constexpr size_t PACKETS_PER_FRAME = 64;
 constexpr int PAYLOAD_SIZE = 8192;
 constexpr int PACKET_SIZE = sizeof(PacketHeader) + PAYLOAD_SIZE;
 constexpr size_t FRAME_SIZE = NROW * NCOL * sizeof(uint16_t);

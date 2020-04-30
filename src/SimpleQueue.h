@@ -3,17 +3,20 @@
 constexpr std::size_t hardware_destructive_interference_size = 128;
 
 template <typename T> class SimpleQueue {
-    //Benchmark and investigate effects of padding
+    // Benchmark and investigate effects of padding
     char pad0_[hardware_destructive_interference_size];
-    alignas(hardware_destructive_interference_size) std::atomic<uint32_t> readIndex_{0};
-    alignas(hardware_destructive_interference_size) std::atomic<uint32_t> writeIndex_{0};
+    alignas(hardware_destructive_interference_size)
+        std::atomic<uint32_t> readIndex_{0};
+    alignas(hardware_destructive_interference_size)
+        std::atomic<uint32_t> writeIndex_{0};
     std::size_t size;
     T *records_;
+
   public:
-    SimpleQueue(uint32_t qsize) : size(qsize+1), records_(new T[size]) {}
+    SimpleQueue(uint32_t qsize) : size(qsize + 1), records_(new T[size]) {}
     ~SimpleQueue() { delete[] records_; }
 
-    std::size_t  sizeGuess() const {
+    std::size_t sizeGuess() const {
         int ret = writeIndex_.load(std::memory_order_acquire) -
                   readIndex_.load(std::memory_order_acquire);
         if (ret < 0) {
@@ -22,7 +25,8 @@ template <typename T> class SimpleQueue {
         return ret;
     }
 
-
+    // should this be reference?
+    // T is usually a pointer
     bool push(T &element) {
         auto const currentWrite = writeIndex_.load(std::memory_order_relaxed);
         auto nextRecord = currentWrite + 1;

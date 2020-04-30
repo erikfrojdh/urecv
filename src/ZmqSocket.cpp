@@ -1,20 +1,20 @@
-#include "Streamer.h"
+#include "ZmqSocket.h"
 #include <fmt/format.h>
 #include <stdexcept>
 #include <thread>
 #include <zmq.h>
-using namespace std::literals;
-Streamer::Streamer(const std::string &endpoint) {
+
+ZmqSocket::ZmqSocket(const std::string &endpoint) {
     context = zmq_ctx_new();
     socket = zmq_socket(context, ZMQ_PUB);
     if (zmq_bind(socket, endpoint.c_str()))
         throw std::runtime_error("Could not bind endpoint");
 
-    std::this_thread::sleep_for(1s);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     fmt::print("Publishing data on on: {}\n", endpoint);
 }
 
-void Streamer::send(Image &img, size_t data_size) {
+void ZmqSocket::send(ImageView &img, size_t data_size) {
     auto sent = zmq_send(socket, &img.frameNumber, sizeof(img.frameNumber),
                          ZMQ_SNDMORE);
     sent += zmq_send(socket, img.data, data_size, 0);
@@ -24,7 +24,7 @@ void Streamer::send(Image &img, size_t data_size) {
     }
 }
 
-Streamer::~Streamer() {
+ZmqSocket::~ZmqSocket() {
     zmq_close(socket);
     zmq_ctx_destroy(context);
 }

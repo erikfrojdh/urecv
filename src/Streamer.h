@@ -1,13 +1,29 @@
 #pragma once
-#include "utils.h"
-#include <cstddef>
+#include "ImageFifo.h"
+#include "ImageView.h"
+#include "ZmqSocket.h"
 #include <string>
+#include <atomic>
+namespace urecv {
 class Streamer {
-    void *context{nullptr};
-    void *socket{nullptr};
+    ImageFifo *fifo_;
+    ZmqSocket socket_;
+    std::atomic<bool> stopped_;
 
   public:
-    Streamer(const std::string &endpoint);
-    ~Streamer();
-    void send(Image &img, size_t data_size);
+    Streamer(const std::string &endpoint, ImageFifo *fifo)
+        : fifo_(fifo), socket_(endpoint) {}
+    void stream(){
+
+        while (!stopped_){
+            ImageView img = fifo_->pop_image();
+            socket_.send(img, fifo_->image_size());
+            fifo_->push_free(img);
+        }
+
+    }
+    void stop(){
+        stopped_ = true;
+    }
 };
+} // namespace urecv

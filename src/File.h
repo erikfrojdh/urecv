@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ImageView.h"
 #include "defs.h"
 #include "utils.h"
 #include <string>
@@ -25,8 +26,13 @@ template <typename T> class File {
         meta_size_ =
             bytes_needed + (IO_ALIGNMENT - bytes_needed % IO_ALIGNMENT);
         fmt::print("Allocating {} bytes for footer\n", meta_size_);
-        meta_ = static_cast<int64_t *>(
-            std::aligned_alloc(IO_ALIGNMENT, meta_size_));
+        // meta_ = static_cast<int64_t *>(
+        //     std::aligned_alloc(IO_ALIGNMENT, meta_size_));
+
+        posix_memalign(meta_, IO_ALIGNMENT, meta_size_);
+
+
+// int posix_memalign(void **memptr, size_t alignment, size_t size);
     }
 
     std::string currentFname() {
@@ -66,7 +72,7 @@ template <typename T> class File {
         free(meta_);
     }
 
-    void write(const Image &img) {
+    void write(const ImageView &img) {
         if (n_written_ == frames_per_file_) {
             close();
             open(fmt::format("{}_{}.bin", basename_, ++file_nr_));

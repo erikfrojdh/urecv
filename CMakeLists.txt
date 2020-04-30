@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(urecv)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -12,16 +12,17 @@ option(RX_USE_SANITIZER "Sanitizers for debugging" OFF)
 if(RX_USE_SANITIZER)
   # set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=thread")
   # set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=thread")
-  set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
-  set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+  set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address,undefined")
+  set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address,undefined")
   set(CMAKE_BUILD_TYPE "Debug")
 endif(RX_USE_SANITIZER)
 
 find_package(fmt REQUIRED)
 
 set(SRC_FILES
-src/Receiver.cpp src/UdpSocket.cpp 
-src/Streamer.cpp 
+src/Receiver.cpp 
+src/UdpSocket.cpp 
+src/ZmqSocket.cpp 
 src/utils.cpp 
 src/DirectWriter.cpp
 src/FwriteWriter.cpp
@@ -57,8 +58,7 @@ target_link_libraries(rxStatic PUBLIC fmt pthread zmq)
 add_executable(urecv src/main.cpp)
 target_link_libraries(urecv PUBLIC rxStatic)
 
-add_executable(ftest src/ftest.cpp)
-target_link_libraries(ftest PUBLIC rxStatic)
+add_subdirectory(tests)
 
 set( PYTHON_FILES
     read_binary.py
