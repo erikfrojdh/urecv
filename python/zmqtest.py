@@ -14,7 +14,7 @@ socket.setsockopt(zmq.SUBSCRIBE, b"")
 n_frames = 10
 
 frame_nr = np.zeros(n_frames)
-data = np.zeros((n_frames, 512, 1024))
+data = np.zeros((n_frames, 1024, 1024))
 caught_frames = 0
 
 while(caught_frames < n_frames):
@@ -22,7 +22,7 @@ while(caught_frames < n_frames):
     if len(buf):
         frame_nr[caught_frames] = np.frombuffer(buf, dtype=np.int64)[0]
         buf = socket.recv()
-        data[caught_frames] = np.frombuffer(buf, dtype  = np.uint16).reshape(512, 1024)
+        data[caught_frames] = np.frombuffer(buf, dtype  = np.uint16).reshape(1024, 1024)
         caught_frames += 1
 
 

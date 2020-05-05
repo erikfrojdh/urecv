@@ -26,13 +26,8 @@ template <typename T> class File {
         meta_size_ =
             bytes_needed + (IO_ALIGNMENT - bytes_needed % IO_ALIGNMENT);
         fmt::print("Allocating {} bytes for footer\n", meta_size_);
-        // meta_ = static_cast<int64_t *>(
-        //     std::aligned_alloc(IO_ALIGNMENT, meta_size_));
 
         posix_memalign(meta_, IO_ALIGNMENT, meta_size_);
-
-
-// int posix_memalign(void **memptr, size_t alignment, size_t size);
     }
 
     std::string currentFname() {
@@ -52,6 +47,7 @@ template <typename T> class File {
         n_written_ = 0;
         writerImpl.close();
     }
+    
     void write_meta() {
         auto npos = meta_size_ / sizeof(*meta_);
         fmt::print("npos: {}\n", npos);

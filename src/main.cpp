@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     try {
         // Create receivers
         std::vector<std::unique_ptr<Receiver>> receivers;
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < 4; ++i) {
             receivers.push_back(urecv::make_unique<Receiver>(
                 node, std::to_string(starting_port + i)));
         }
