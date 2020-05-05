@@ -47,7 +47,7 @@ template <typename T> class File {
         n_written_ = 0;
         writerImpl.close();
     }
-    
+
     void write_meta() {
         auto npos = meta_size_ / sizeof(*meta_);
         fmt::print("npos: {}\n", npos);

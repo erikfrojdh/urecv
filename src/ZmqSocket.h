@@ -1,6 +1,6 @@
 #pragma once
-#include "utils.h"
 #include "ImageView.h"
+#include "utils.h"
 #include <cstddef>
 #include <string>
 class ZmqSocket {

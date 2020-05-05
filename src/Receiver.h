@@ -1,10 +1,10 @@
 #pragma once
 #include "ImageFifo.h"
+#include "ImageView.h"
 #include "UdpSocket.h"
 #include "defs.h"
 #include "utils.h"
 #include <memory>
-#include "ImageView.h"
 
 class Receiver {
     ImageFifo fifo_;
@@ -21,5 +21,5 @@ class Receiver {
     ~Receiver();
     void receivePackets(int cpu);
     void finish();
-    ImageFifo* fifo(){return &fifo_;}
+    ImageFifo *fifo() { return &fifo_; }
 };

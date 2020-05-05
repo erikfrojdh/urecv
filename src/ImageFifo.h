@@ -1,13 +1,13 @@
 #pragma once
 #include "ImageView.h"
 #include "SimpleQueue.h"
-#include <memory>
 #include <chrono>
-#include <fmt/format.h>
 #include <fmt/color.h>
+#include <fmt/format.h>
+#include <memory>
 #include <thread>
 
-//template parameter for aligned alloc????
+// template parameter for aligned alloc????
 class ImageFifo {
     size_t fifo_size_;
     size_t image_size_;
@@ -49,25 +49,24 @@ class ImageFifo {
     }
     ImageView pop_image(std::chrono::nanoseconds wait) {
         ImageView v;
-        while (!filled_slots.pop(v)){
+        while (!filled_slots.pop(v)) {
             std::this_thread::sleep_for(wait);
         }
         return v;
     }
 
-    ImageView pop_image(std::chrono::nanoseconds wait, std::atomic<bool>& stopped) {
+    ImageView pop_image(std::chrono::nanoseconds wait,
+                        std::atomic<bool> &stopped) {
         ImageView v;
-        while (!filled_slots.pop(v) && !stopped){
+        while (!filled_slots.pop(v) && !stopped) {
             std::this_thread::sleep_for(wait);
         }
-        if(stopped)
+        if (stopped)
             fmt::print(fg(fmt::color::rosy_brown), "STOPPED!\n");
         return v;
     }
 
-    bool try_pop_image(ImageView& img){
-        return filled_slots.pop(img);
-    }
+    bool try_pop_image(ImageView &img) { return filled_slots.pop(img); }
 
     void push_image(ImageView &v) {
         while (!filled_slots.push(v))
@@ -78,5 +77,4 @@ class ImageFifo {
         while (!free_slots.push(v))
             ;
     }
-
 };

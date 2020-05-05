@@ -1,18 +1,18 @@
 #include "Receiver.h"
+#include "RxMemory.h"
 #include "UdpSocket.h"
 #include <chrono>
 #include <cstdlib>
 #include <fmt/color.h>
 #include <fmt/format.h>
 #include <thread>
-#include "RxMemory.h"
 
 Receiver::Receiver(const std::string &node, const std::string &port)
     : Receiver(node, port, QUEUE_SIZE) {}
 
 Receiver::Receiver(const std::string &node, const std::string &port,
                    size_t fifo_size)
-    : fifo_(fifo_size, FRAME_SIZE){
+    : fifo_(fifo_size, FRAME_SIZE) {
     sock = urecv::make_unique<UdpSocket>(node, port, PACKET_SIZE);
     fmt::print("Listening to: {}:{}\n", node, port);
     sock->setBufferSize(DEFAULT_UDP_BUFFER_SIZE);

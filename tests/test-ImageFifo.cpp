@@ -1,8 +1,8 @@
 
-#include <catch2/catch.hpp>
-#include <numeric>
 #include "ImageFifo.h"
 #include "ImageView.h"
+#include <catch2/catch.hpp>
+#include <numeric>
 
 TEST_CASE("Construct an ImageFifo") {
     constexpr size_t img_size = 8000;
@@ -25,23 +25,22 @@ TEST_CASE("Construct an ImageFifo") {
     }
 
     SECTION("Touch all memory to see if sanitizer fires") {
-        for (size_t i=0; i<fifo.size(); ++i){
+        for (size_t i = 0; i < fifo.size(); ++i) {
             ImageView img = fifo.pop_free();
             img.frameNumber = i;
             std::fill_n(img.data, size, char(2));
             fifo.push_image(img);
         }
 
-        for (size_t i=0; i<fifo.size(); ++i){
+        for (size_t i = 0; i < fifo.size(); ++i) {
             ImageView img = fifo.pop_image();
-            auto sum = std::accumulate(img.data, img.data+size, 0U);
+            auto sum = std::accumulate(img.data, img.data + size, 0U);
             REQUIRE(sum == 16000);
             REQUIRE(img.frameNumber == i);
             fifo.push_free(img);
         }
-        
+
         REQUIRE(fifo.numFilledSlots() == 0);
-        REQUIRE(fifo.numFreeSlots()== 100);
-    
+        REQUIRE(fifo.numFreeSlots() == 100);
     }
 }

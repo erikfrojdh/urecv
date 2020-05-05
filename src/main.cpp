@@ -1,6 +1,6 @@
 #include "FrameAssembler.h"
-#include "Streamer.h"
 #include "Receiver.h"
+#include "Streamer.h"
 #include <fmt/color.h>
 #include <fmt/format.h>
 #include <thread>
@@ -14,7 +14,6 @@
 constexpr auto node = "192.168.122.1";
 constexpr auto endpoint = "tcp://*:4545";
 constexpr int starting_port = 50001;
-
 
 int main(int argc, char *argv[]) {
     direct_input();
@@ -32,11 +31,11 @@ int main(int argc, char *argv[]) {
         // Start listening threads
         int cpu = 0;
         std::vector<std::thread> threads;
-        for (auto & r: receivers) {
-            threads.emplace_back(&Receiver::receivePackets, r.get(),
-                                 cpu++);
+        for (auto &r : receivers) {
+            threads.emplace_back(&Receiver::receivePackets, r.get(), cpu++);
         }
-        threads.emplace_back(&urecv::FrameAssembler::assemble, &assembler, cpu++);
+        threads.emplace_back(&urecv::FrameAssembler::assemble, &assembler,
+                             cpu++);
         threads.emplace_back(&urecv::Streamer::stream, &streamer, cpu++);
 
         // Listen for 'q'

@@ -1,11 +1,11 @@
 #include "UdpSocket.h"
 #include <cstring> //memset
+#include <fmt/format.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <stdexcept>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <fmt/format.h>
 
 UdpSocket::UdpSocket(const std::string &node, const std::string &port,
                      int packet_size)
@@ -34,16 +34,14 @@ UdpSocket::~UdpSocket() {
     sockfd = -1;
 }
 
-void UdpSocket::shutdown(){
-    ::shutdown(sockfd, SHUT_RDWR);
-}
+void UdpSocket::shutdown() { ::shutdown(sockfd, SHUT_RDWR); }
 
 bool UdpSocket::receivePacket(void *dst, PacketHeader &header) {
     auto rc = recvfrom(sockfd, dst, packet_size, 0, nullptr, nullptr);
-    if(rc == packet_size){
+    if (rc == packet_size) {
         memcpy(&header, dst, sizeof(header));
         return true;
-    }else{
+    } else {
         fmt::print("Warning: read {} bytes\n", rc);
     }
     return false;
@@ -60,5 +58,5 @@ size_t UdpSocket::bufferSize() const {
     uint64_t size = 0;
     socklen_t optlen = sizeof(uint64_t);
     getsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &size, &optlen);
-    return size/2;
+    return size / 2;
 }

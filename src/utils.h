@@ -1,7 +1,7 @@
 #pragma once
+#include <algorithm>
 #include <cstddef>
 #include <string>
-#include <algorithm>
 void pin_this_thread(int i);
 void set_realtime_priority();
 void direct_input();

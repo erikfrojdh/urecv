@@ -1,8 +1,8 @@
 #include "SimpleQueue.h"
 #include <catch2/catch.hpp>
 #include <fmt/format.h>
-#include <thread>
 #include <future>
+#include <thread>
 
 TEST_CASE("Basic operations") {
     SimpleQueue<int> queue(3);
@@ -38,7 +38,7 @@ TEST_CASE("Basic operations") {
     REQUIRE(queue.sizeGuess() == 0);
 }
 
-void produce(SimpleQueue<int>& q, int n) {
+void produce(SimpleQueue<int> &q, int n) {
     int val = 0;
     for (int i = 0; i < n; ++i) {
         val = i;
@@ -46,7 +46,7 @@ void produce(SimpleQueue<int>& q, int n) {
             ;
     }
 }
-int consume(SimpleQueue<int>& q, int n, int& sum) {
+int consume(SimpleQueue<int> &q, int n, int &sum) {
     int val = 0;
     for (int i = 0; i < n; ++i) {
         while (!q.pop(val))
@@ -60,11 +60,10 @@ TEST_CASE("Threads") {
     int n = 1000;
     int sum = 0;
     SimpleQueue<int> queue(5);
-    std::thread t1{&produce, std::ref(queue), n+1};
-    std::thread t2{&consume, std::ref(queue), n+1, std::ref(sum)};
+    std::thread t1{&produce, std::ref(queue), n + 1};
+    std::thread t2{&consume, std::ref(queue), n + 1, std::ref(sum)};
     t1.join();
     t2.join();
 
-
-    REQUIRE(sum == n*(n+1)/2);
+    REQUIRE(sum == n * (n + 1) / 2);
 }
