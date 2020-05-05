@@ -13,7 +13,7 @@ Receiver::Receiver(const std::string &node, const std::string &port)
 Receiver::Receiver(const std::string &node, const std::string &port,
                    size_t fifo_size)
     : fifo_(fifo_size, FRAME_SIZE) {
-    sock = urecv::make_unique<UdpSocket>(node, port, PACKET_SIZE);
+    sock = ur::make_unique<UdpSocket>(node, port, PACKET_SIZE);
     fmt::print("Listening to: {}:{}\n", node, port);
     sock->setBufferSize(DEFAULT_UDP_BUFFER_SIZE);
     fmt::print("UDP buffer size: {} MB\n",

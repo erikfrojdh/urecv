@@ -18,7 +18,7 @@ void reset_terminal();
 // };
 // Args parse_args(int argc, char *argv[]);
 
-namespace urecv {
+namespace ur {
 /** Compare elements in a Container to see if they are all equal */
 template <typename Container> bool allEqual(const Container &c) {
     if (!c.empty() &&
@@ -29,4 +29,4 @@ template <typename Container> bool allEqual(const Container &c) {
         return true;
     return false;
 }
-} // namespace urecv
+} // namespace ur

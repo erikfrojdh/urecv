@@ -1,8 +1,9 @@
 import argparse
 import numpy as np
+import matplotlib.pyplot as plt
+plt.ion()
 
-
-n_rows = 512
+n_rows = 1024
 n_cols = 1024
 
 parser = argparse.ArgumentParser()
@@ -26,6 +27,7 @@ with open(args.fname, 'rb') as f:
     f.seek(0)
     data = np.fromfile(f, dtype = np.uint16, count = n_rows*n_cols*n_frames).reshape(n_frames, n_rows, n_cols)
     
-
+fig, ax = plt.subplots(1,1)
+im = ax.imshow(data[5])
 
 

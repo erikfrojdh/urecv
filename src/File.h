@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ImageFifo.h"
 #include "ImageView.h"
 #include "defs.h"
 #include "utils.h"
@@ -8,16 +9,21 @@
 #include <fmt/color.h>
 #include <fmt/format.h>
 
+#include <stdlib.h> //posix_memalign
+
+namespace ur {
+
 template <typename T> class File {
     static constexpr auto writer_color = fmt::color::green;
     T writerImpl;
-
     int64_t *meta_;
-    size_t n_written_ = 0;
-    size_t frames_per_file_ = 1000;
-    size_t file_nr_ = 0;
+    size_t n_written_{0};
+    size_t frames_per_file_{1000};
+    size_t file_nr_{0};
     size_t meta_size_;
     std::string basename_;
+    ImageFifo *fifo_;
+    size_t image_size_;
 
     void allocate_meta() {
         auto bytes_needed =
@@ -27,7 +33,10 @@ template <typename T> class File {
             bytes_needed + (IO_ALIGNMENT - bytes_needed % IO_ALIGNMENT);
         fmt::print("Allocating {} bytes for footer\n", meta_size_);
 
-        posix_memalign(meta_, IO_ALIGNMENT, meta_size_);
+        // extern int posix_memalign (void **__memptr, size_t __alignment,
+        // size_t __size)
+        posix_memalign(reinterpret_cast<void **>(&meta_), IO_ALIGNMENT,
+                       meta_size_);
     }
 
     std::string currentFname() {
@@ -57,9 +66,12 @@ template <typename T> class File {
     }
 
   public:
-    File(const std::string &basename) : File(basename, 1000) {}
-    File(const std::string &basename, size_t frames_per_file)
-        : frames_per_file_(frames_per_file), basename_(basename) {
+    File(ImageFifo *fifo) : File("file", 1000, fifo) {}
+    // File(const std::string &basename) : File(basename, 1000) {}
+
+    File(const std::string &basename, size_t frames_per_file, ImageFifo *fifo)
+        : frames_per_file_(frames_per_file), basename_(basename), fifo_(fifo),
+          image_size_(fifo_->image_size()) {
         allocate_meta();
         writerImpl.open(currentFname());
     }
@@ -74,6 +86,8 @@ template <typename T> class File {
             open(fmt::format("{}_{}.bin", basename_, ++file_nr_));
         }
         meta_[n_written_++] = img.frameNumber;
-        writerImpl.write(img.data, FRAME_SIZE);
+        writerImpl.write(img.data, image_size_);
     }
 };
+
+} // namespace ur

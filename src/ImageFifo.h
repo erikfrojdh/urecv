@@ -1,13 +1,13 @@
 #pragma once
 #include "ImageView.h"
 #include "SimpleQueue.h"
+#include "defs.h"
 #include <chrono>
 #include <fmt/color.h>
 #include <fmt/format.h>
 #include <memory>
 #include <thread>
 
-// template parameter for aligned alloc????
 class ImageFifo {
     size_t fifo_size_;
     size_t image_size_;
@@ -18,8 +18,10 @@ class ImageFifo {
   public:
     ImageFifo(size_t fifo_size, size_t image_size)
         : fifo_size_(fifo_size), image_size_(image_size),
-          free_slots(fifo_size_), filled_slots(fifo_size_),
-          data(new char[fifo_size_ * image_size_]) {
+          free_slots(fifo_size_), filled_slots(fifo_size_) {
+
+        posix_memalign(reinterpret_cast<void **>(&data), IO_ALIGNMENT,
+                       fifo_size_ * image_size_);
 
         ImageView v;
         for (size_t i = 0; i < fifo_size_; ++i) {
@@ -27,7 +29,7 @@ class ImageFifo {
             free_slots.push(v);
         }
     }
-    ~ImageFifo() { delete[] data; }
+    ~ImageFifo() { free(data); }
 
     size_t size() const noexcept { return fifo_size_; }
     size_t image_size() const noexcept { return image_size_; }

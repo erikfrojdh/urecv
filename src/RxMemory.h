@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-namespace urecv {
+namespace ur {
 // C++11 make_unique implementation for exception safety
 // already available as std::make_unique in C++14
 template <typename T, typename... Args>
@@ -15,4 +15,4 @@ make_unique(std::size_t n) {
     typedef typename std::remove_extent<T>::type RT;
     return std::unique_ptr<T>(new RT[n]);
 }
-} // namespace urecv
+} // namespace ur

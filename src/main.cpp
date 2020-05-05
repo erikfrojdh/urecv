@@ -1,6 +1,7 @@
 #include "FrameAssembler.h"
 #include "Receiver.h"
 #include "Streamer.h"
+#include "Writer.h"
 #include <fmt/color.h>
 #include <fmt/format.h>
 #include <thread>
@@ -21,12 +22,11 @@ int main(int argc, char *argv[]) {
         // Create receivers
         std::vector<std::unique_ptr<Receiver>> receivers;
         for (int i = 0; i < 4; ++i) {
-            receivers.push_back(urecv::make_unique<Receiver>(
+            receivers.push_back(ur::make_unique<Receiver>(
                 node, std::to_string(starting_port + i)));
         }
 
-        urecv::FrameAssembler assembler(receivers);
-        urecv::Streamer streamer(endpoint, assembler.fifo());
+        ur::FrameAssembler assembler(receivers);
 
         // Start listening threads
         int cpu = 0;
@@ -34,9 +34,13 @@ int main(int argc, char *argv[]) {
         for (auto &r : receivers) {
             threads.emplace_back(&Receiver::receivePackets, r.get(), cpu++);
         }
-        threads.emplace_back(&urecv::FrameAssembler::assemble, &assembler,
-                             cpu++);
-        threads.emplace_back(&urecv::Streamer::stream, &streamer, cpu++);
+        threads.emplace_back(&ur::FrameAssembler::assemble, &assembler, cpu++);
+
+        // ur::Streamer streamer(endpoint, assembler.fifo());
+        // threads.emplace_back(&ur::Streamer::stream, &streamer, cpu++);
+
+        ur::Writer writer(assembler.fifo());
+        threads.emplace_back(&ur::Writer::write, &writer, cpu++);
 
         // Listen for 'q'
         while (true) {
@@ -46,7 +50,8 @@ int main(int argc, char *argv[]) {
                 for (auto &r : receivers)
                     r->finish();
                 assembler.stop();
-                streamer.stop();
+                // streamer.stop();
+                writer.stop();
                 break;
             }
         }

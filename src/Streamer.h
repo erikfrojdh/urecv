@@ -6,7 +6,7 @@
 #include <fmt/format.h>
 #include <string>
 #include <thread>
-namespace urecv {
+namespace ur {
 
 class Streamer {
     ImageFifo *fifo_;
@@ -32,4 +32,4 @@ class Streamer {
     }
     void stop() { stopped_ = true; }
 };
-} // namespace urecv
+} // namespace ur
