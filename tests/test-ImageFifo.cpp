@@ -3,7 +3,8 @@
 #include "ImageView.h"
 #include <catch2/catch.hpp>
 #include <numeric>
-
+using ur::ImageFifo;
+using ur::ImageView;
 TEST_CASE("Construct an ImageFifo") {
     constexpr size_t img_size = 8000;
     ImageFifo fifo(100, img_size);

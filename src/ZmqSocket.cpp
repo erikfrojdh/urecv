@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <thread>
 #include <zmq.h>
-
+namespace ur {
 ZmqSocket::ZmqSocket(const std::string &endpoint) {
     context = zmq_ctx_new();
     socket = zmq_socket(context, ZMQ_PUB);
@@ -28,3 +28,4 @@ ZmqSocket::~ZmqSocket() {
     zmq_close(socket);
     zmq_ctx_destroy(context);
 }
+} // namespace ur

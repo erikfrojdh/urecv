@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(urecv)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 
@@ -37,8 +36,9 @@ set(SRC_FILES
   src/FwriteWriter.cpp
 )
 
-add_library(rxStatic STATIC ${SRC_FILES})
-target_compile_options(rxStatic INTERFACE 
+add_library(project_settings INTERFACE)
+target_compile_features(project_settings INTERFACE cxx_std_11)
+target_compile_options(project_settings INTERFACE 
                             -Wall
                             -Wextra
                             -Wshadow
@@ -58,11 +58,17 @@ target_compile_options(rxStatic INTERFACE
                             -Wpedantic
 )
 
-target_link_libraries(rxStatic PUBLIC fmt pthread zmq)
 
-add_executable(urecv src/main.cpp)
+add_library(rxStatic STATIC ${SRC_FILES})
+target_include_directories(rxStatic PUBLIC src/) #FIX later
+target_link_libraries(rxStatic PUBLIC project_settings fmt pthread zmq)
+
+
+add_executable(urecv app/urecv.cpp)
 target_link_libraries(urecv PUBLIC rxStatic)
 
+add_executable(write_test app/write_test.cpp)
+target_link_libraries(write_test PUBLIC rxStatic)
 
 set( PYTHON_FILES
     read_binary.py

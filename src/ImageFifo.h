@@ -7,7 +7,7 @@
 #include <fmt/format.h>
 #include <memory>
 #include <thread>
-
+namespace ur {
 class ImageFifo {
     size_t fifo_size_;
     size_t image_size_;
@@ -80,3 +80,4 @@ class ImageFifo {
             ;
     }
 };
+} // namespace ur

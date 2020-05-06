@@ -17,23 +17,23 @@ constexpr auto endpoint = "tcp://*:4545";
 constexpr int starting_port = 50001;
 
 int main(int argc, char *argv[]) {
-    direct_input();
+    ur::direct_input();
     try {
         // Create receivers
-        std::vector<std::unique_ptr<Receiver>> receivers;
+        std::vector<std::unique_ptr<ur::Receiver>> receivers;
         for (int i = 0; i < 4; ++i) {
-            receivers.push_back(ur::make_unique<Receiver>(
+            receivers.push_back(ur::make_unique<ur::Receiver>(
                 node, std::to_string(starting_port + i)));
         }
-
-        ur::FrameAssembler assembler(receivers);
 
         // Start listening threads
         int cpu = 0;
         std::vector<std::thread> threads;
         for (auto &r : receivers) {
-            threads.emplace_back(&Receiver::receivePackets, r.get(), cpu++);
+            threads.emplace_back(&ur::Receiver::receivePackets, r.get(), cpu++);
         }
+
+        ur::FrameAssembler assembler(receivers);
         threads.emplace_back(&ur::FrameAssembler::assemble, &assembler, cpu++);
 
         // ur::Streamer streamer(endpoint, assembler.fifo());
@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
             if (key == 'q') {
                 fmt::print(fg(fmt::color::red), "Recived \'q\' aborting!\n");
                 for (auto &r : receivers)
-                    r->finish();
+                    r->stop();
                 assembler.stop();
                 // streamer.stop();
                 writer.stop();
@@ -58,10 +58,10 @@ int main(int argc, char *argv[]) {
 
         for (auto &&t : threads)
             t.join();
+
     } catch (const std::runtime_error &e) {
         fmt::print(fg(fmt::color::red), "ERROR: {}\n", e.what());
     }
-
     fmt::print(fg(fmt::color::hot_pink), "Bye!\n");
-    reset_terminal();
+    ur::reset_terminal();
 }

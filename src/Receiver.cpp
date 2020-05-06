@@ -7,6 +7,8 @@
 #include <fmt/format.h>
 #include <thread>
 
+namespace ur {
+
 Receiver::Receiver(const std::string &node, const std::string &port)
     : Receiver(node, port, QUEUE_SIZE) {}
 
@@ -20,19 +22,16 @@ Receiver::Receiver(const std::string &node, const std::string &port,
                sock->bufferSize() / (1024. * 1024.));
 }
 
-void Receiver::finish() {
+void Receiver::stop() {
     stopped_ = true;
     sock->shutdown();
 }
-
-Receiver::~Receiver() {}
 
 void Receiver::receivePackets(int cpu) {
     pin_this_thread(cpu);
     set_realtime_priority();
     char packet_buffer[PACKET_SIZE];
     PacketHeader header{};
-    ImageView img;
     sock->receivePacket(packet_buffer, header); // waits here for data
     uint64_t currentFrameNumber = header.frameNumber;
     int numPacketsReceived = 0;
@@ -67,6 +66,7 @@ void Receiver::receivePackets(int cpu) {
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(
         1000)); // make sure we have time to sink images
-    receiver_done_ = true;
     fmt::print("UDP thread done\n");
 }
+
+} // namespace ur

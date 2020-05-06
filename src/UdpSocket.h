@@ -1,9 +1,10 @@
 #pragma once
 #include "defs.h"
 #include <string>
+namespace ur {
 class UdpSocket {
-    int sockfd = -1;
-    int packet_size;
+    int sockfd_ = -1;
+    int packet_size_;
 
   public:
     UdpSocket(const std::string &node, const std::string &port,
@@ -14,3 +15,4 @@ class UdpSocket {
     size_t bufferSize() const;
     void shutdown();
 };
+} // namespace ur

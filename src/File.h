@@ -42,6 +42,9 @@ template <typename T> class File {
         meta_[n_written_++] = img.frameNumber;
         writerImpl.write(img.data, image_size_);
     }
+    std::string currentFname() {
+        return fmt::format("{}_{}.bin", basename_, file_nr_);
+    }
 
   private:
     void allocate_meta() {
@@ -55,10 +58,6 @@ template <typename T> class File {
         // Can be replaces with C++17 aligned_alloc
         posix_memalign(reinterpret_cast<void **>(&meta_), IO_ALIGNMENT,
                        meta_size_);
-    }
-
-    std::string currentFname() {
-        return fmt::format("{}_{}.bin", basename_, file_nr_);
     }
 
     void open(const std::string &fname) {

@@ -6,10 +6,10 @@
 #include <stdexcept>
 #include <sys/socket.h>
 #include <unistd.h>
-
+namespace ur {
 UdpSocket::UdpSocket(const std::string &node, const std::string &port,
                      int packet_size)
-    : packet_size(packet_size) {
+    : packet_size_(packet_size) {
     // open socket
     struct addrinfo hints {};
     hints.ai_family = AF_UNSPEC;
@@ -18,11 +18,11 @@ UdpSocket::UdpSocket(const std::string &node, const std::string &port,
     struct addrinfo *res{nullptr};
     if (getaddrinfo(node.c_str(), port.c_str(), &hints, &res))
         throw std::runtime_error("Get getaddrinfo failed");
-    sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-    if (sockfd == -1)
+    sockfd_ = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    if (sockfd_ == -1)
         throw std::runtime_error("Failed to open socket");
-    if (bind(sockfd, res->ai_addr, res->ai_addrlen) == -1) {
-        close(sockfd);
+    if (bind(sockfd_, res->ai_addr, res->ai_addrlen) == -1) {
+        close(sockfd_);
         throw std::runtime_error("Failed to bind socket");
     }
     freeaddrinfo(res);
@@ -30,15 +30,15 @@ UdpSocket::UdpSocket(const std::string &node, const std::string &port,
 
 UdpSocket::~UdpSocket() {
     shutdown();
-    ::close(sockfd);
-    sockfd = -1;
+    ::close(sockfd_);
+    sockfd_ = -1;
 }
 
-void UdpSocket::shutdown() { ::shutdown(sockfd, SHUT_RDWR); }
+void UdpSocket::shutdown() { ::shutdown(sockfd_, SHUT_RDWR); }
 
 bool UdpSocket::receivePacket(void *dst, PacketHeader &header) {
-    auto rc = recvfrom(sockfd, dst, packet_size, 0, nullptr, nullptr);
-    if (rc == packet_size) {
+    auto rc = recvfrom(sockfd_, dst, packet_size_, 0, nullptr, nullptr);
+    if (rc == packet_size_) {
         memcpy(&header, dst, sizeof(header));
         return true;
     } else {
@@ -49,7 +49,7 @@ bool UdpSocket::receivePacket(void *dst, PacketHeader &header) {
 
 void UdpSocket::setBufferSize(size_t size) {
     socklen_t optlen = sizeof(size);
-    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &size, optlen)) {
+    if (setsockopt(sockfd_, SOL_SOCKET, SO_RCVBUF, &size, optlen)) {
         throw std::runtime_error("Could not set UDP socket buffer size");
     }
 }
@@ -57,6 +57,7 @@ void UdpSocket::setBufferSize(size_t size) {
 size_t UdpSocket::bufferSize() const {
     uint64_t size = 0;
     socklen_t optlen = sizeof(uint64_t);
-    getsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &size, &optlen);
+    getsockopt(sockfd_, SOL_SOCKET, SO_RCVBUF, &size, &optlen);
     return size / 2;
 }
+} // namespace ur

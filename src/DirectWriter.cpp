@@ -7,7 +7,7 @@
 
 void DirectWriter::open(const std::string &fname) {
     fd_ = ::open(fname.c_str(), O_RDWR | O_CREAT | O_TRUNC | O_DIRECT,
-                 S_IRWXU | S_IROTH);
+                 O_CLOEXEC, S_IRWXU | S_IROTH);
     if (fd_ == -1) {
         throw std::runtime_error(fmt::format("fderror: {}\n", strerror(errno)));
     }
