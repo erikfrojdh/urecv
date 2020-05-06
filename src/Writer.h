@@ -3,8 +3,8 @@
 #include "File.h"
 #include "ImageFifo.h"
 #include "ImageView.h"
-
 #include <atomic>
+
 namespace ur {
 
 class Writer {
@@ -13,12 +13,13 @@ class Writer {
     File<DirectWriter> file_;
 
   public:
-    Writer(ImageFifo *fifo) : fifo_(fifo), file_(fifo) {}
+    Writer(ImageFifo *fifo)
+        : fifo_(fifo), file_("file", 1000, fifo_->image_size()) {}
 
     void write(int cpu) {
         while (!stopped_) {
             auto img = fifo_->pop_image(DEFAULT_WAIT, stopped_);
-            fmt::print("img.frameNumber {}\n", img.frameNumber);
+            // fmt::print("img.frameNumber {}\n", img.frameNumber);
             if (img.frameNumber != -1)
                 file_.write(img);
             fifo_->push_free(img);
