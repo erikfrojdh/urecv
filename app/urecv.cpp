@@ -14,17 +14,21 @@
 
 constexpr auto node = "192.168.122.1";
 constexpr auto endpoint = "tcp://*:4545";
-constexpr int starting_port = 50001;
+// constexpr int starting_port = 50001;
 
 int main(int argc, char *argv[]) {
     ur::direct_input();
     try {
         // Create receivers
         std::vector<std::unique_ptr<ur::Receiver>> receivers;
-        for (int i = 0; i < 4; ++i) {
-            receivers.push_back(ur::make_unique<ur::Receiver>(
-                node, std::to_string(starting_port + i)));
-        }
+        // for (int i = 0; i < 2; ++i) {
+        //     receivers.push_back(ur::make_unique<ur::Receiver>(
+        //         node, std::to_string(starting_port + i)));
+        // }
+        receivers.push_back(ur::make_unique<ur::Receiver>(
+                "10.1.1.160", "50020"));
+        receivers.push_back(ur::make_unique<ur::Receiver>(
+                "10.1.2.160", "50021"));
 
         // Start listening threads
         int cpu = 0;
@@ -36,11 +40,11 @@ int main(int argc, char *argv[]) {
         ur::FrameAssembler assembler(receivers);
         threads.emplace_back(&ur::FrameAssembler::assemble, &assembler, cpu++);
 
-        // ur::Streamer streamer(endpoint, assembler.fifo());
-        // threads.emplace_back(&ur::Streamer::stream, &streamer, cpu++);
+        ur::Streamer streamer(endpoint, assembler.fifo());
+        threads.emplace_back(&ur::Streamer::stream, &streamer, cpu++);
 
-        ur::Writer writer(assembler.fifo());
-        threads.emplace_back(&ur::Writer::write, &writer, cpu++);
+        // ur::Writer writer(assembler.fifo());
+        // threads.emplace_back(&ur::Writer::write, &writer, cpu++);
 
         // Listen for 'q'
         while (true) {
@@ -50,8 +54,8 @@ int main(int argc, char *argv[]) {
                 for (auto &r : receivers)
                     r->stop();
                 assembler.stop();
-                // streamer.stop();
-                writer.stop();
+                streamer.stop();
+                // writer.stop();
                 break;
             }
         }
