@@ -21,7 +21,8 @@ struct PacketHeader {
 constexpr size_t QUEUE_SIZE = 100;
 constexpr size_t NROW = 256;
 constexpr size_t NCOL = 1024;
-// constexpr size_t PACKETS_PER_FRAME = 128;
+constexpr size_t BYTES_PER_PIXEL = 2;
+// constexpr size_t PACKETS_PER_FRAME = 128; //1 port
 constexpr size_t PACKETS_PER_FRAME = 64;
 constexpr int PAYLOAD_SIZE = 8192;
 constexpr int PACKET_SIZE = sizeof(PacketHeader) + PAYLOAD_SIZE;
@@ -30,4 +31,4 @@ constexpr size_t DEFAULT_UDP_BUFFER_SIZE = 1024 * 1024 * 50;
 constexpr auto DEFAULT_ENDPOINT = "tcp://*:4545";
 constexpr auto DEFAULT_WAIT = std::chrono::microseconds(100);
 constexpr size_t IO_ALIGNMENT = 4096;
-constexpr int64_t PRINT_MOD = 1000;
+constexpr int64_t PRINT_MOD = 5000;

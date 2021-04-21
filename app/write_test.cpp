@@ -16,8 +16,8 @@
 
 int main(int argc, char *argv[]) {
     std::string fname{"test"};
-    const size_t n_frames = 10000;
-    const size_t image_size = 1024 * 1024; // 1M
+    const size_t n_frames = 50000;
+    const size_t image_size = 1024 * 512; // 1M
     ur::ImageFifo fifo(n_frames, image_size);
     for (size_t i = 0; i < n_frames; ++i) {
         auto img = fifo.pop_free();
@@ -35,5 +35,5 @@ int main(int argc, char *argv[]) {
     std::chrono::duration<double, std::milli> dt(
         std::chrono::steady_clock::now() - t0);
     auto mbps = (image_size * n_frames / 1024 / 1024) / (dt.count() / 1000.);
-    fmt::print("Write took: {}ms, speed: {} MB/s\n", dt.count(), mbps);
+    fmt::print("Write took: {} ms, speed: {} MB/s {} FPS\n", dt.count(), mbps, n_frames/(dt.count() / 1000.));
 }

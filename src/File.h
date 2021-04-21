@@ -55,7 +55,7 @@ template <typename T> class File {
             bytes_needed + (IO_ALIGNMENT - bytes_needed % IO_ALIGNMENT);
         fmt::print("Allocating {} bytes for footer\n", meta_size_);
 
-        // Can be replaces with C++17 aligned_alloc
+        // Can be replaced with C++17 aligned_alloc
         posix_memalign(reinterpret_cast<void **>(&meta_), IO_ALIGNMENT,
                        meta_size_);
     }

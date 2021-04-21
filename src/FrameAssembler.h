@@ -13,7 +13,7 @@
 
 namespace ur {
 
-class FrameAssembler {
+template <int FromCol = 0, int ToCol = 1024> class FrameAssembler {
     std::vector<ImageFifo *> fifos_;
     std::atomic<bool> stopped_{false};
     ImageFifo assembled_images_;
@@ -21,7 +21,8 @@ class FrameAssembler {
 
   public:
     FrameAssembler(const std::vector<std::unique_ptr<Receiver>> &rec)
-        : assembled_images_(10, rec.size() * FRAME_SIZE),
+        : assembled_images_(QUEUE_SIZE, rec.size() * (ToCol-FromCol) * NROW *
+                                            BYTES_PER_PIXEL),
           frame_numbers_(rec.size()) {
         for (auto &r : rec) {
             fifos_.push_back(r->fifo());
@@ -29,6 +30,10 @@ class FrameAssembler {
     }
     ImageFifo *fifo() { return &assembled_images_; }
     void stop() { stopped_ = true; }
+
+    size_t frame_size() const {
+        return fifos_.size() * (ToCol-FromCol) * NROW * BYTES_PER_PIXEL;
+    }
 
     void assemble(int cpu) {
         pin_this_thread(cpu);

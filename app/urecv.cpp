@@ -21,14 +21,11 @@ int main(int argc, char *argv[]) {
     try {
         // Create receivers
         std::vector<std::unique_ptr<ur::Receiver>> receivers;
-        // for (int i = 0; i < 2; ++i) {
-        //     receivers.push_back(ur::make_unique<ur::Receiver>(
-        //         node, std::to_string(starting_port + i)));
-        // }
         receivers.push_back(ur::make_unique<ur::Receiver>(
-                "10.1.1.160", "50020"));
+                "10.1.2.160", "50020"));
         receivers.push_back(ur::make_unique<ur::Receiver>(
-                "10.1.2.160", "50021"));
+                "10.1.1.160", "50021"));
+        
 
         // Start listening threads
         int cpu = 0;
@@ -37,11 +34,13 @@ int main(int argc, char *argv[]) {
             threads.emplace_back(&ur::Receiver::receivePackets, r.get(), cpu++);
         }
 
-        ur::FrameAssembler assembler(receivers);
-        threads.emplace_back(&ur::FrameAssembler::assemble, &assembler, cpu++);
+        ur::FrameAssembler<256,768> assembler(receivers);
+        threads.emplace_back(&ur::FrameAssembler<256,768>::assemble, &assembler, cpu++);
 
         ur::Streamer streamer(endpoint, assembler.fifo());
         threads.emplace_back(&ur::Streamer::stream, &streamer, cpu++);
+
+        fmt::print("Frame size: {} bytes\n", assembler.frame_size());
 
         // ur::Writer writer(assembler.fifo());
         // threads.emplace_back(&ur::Writer::write, &writer, cpu++);
